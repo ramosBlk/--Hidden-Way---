@@ -31,7 +31,6 @@ while loop:
     # Agora quem desenha o personagem é a própria classe Player
     player.desenhar(janela)
     player.mover()
-
     pygame.display.update()
 
 pygame.quit()
