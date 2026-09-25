@@ -5,8 +5,8 @@ from classes.player import Player
 
 pygame.init()
 
-LARGURA = 800
-ALTURA = 600
+LARGURA = 1400
+ALTURA = 760
 
 janela = pygame.display.set_mode((LARGURA, ALTURA))
 pygame.display.set_caption("Hidden Way")

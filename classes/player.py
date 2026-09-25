@@ -1,11 +1,16 @@
 import os
 import pygame
 
+from classes.colisao import Colisao
+
 
 class Player:
-    def __init__(self, x=50, y=520):
+    def __init__(self, x=50, y=570):  # Posição inicial na estrada de terra
 
-        # Direção inicial
+        # Aumentado para 96x96 para ficar proporcional à resolução 1400x760
+        self.largura = 96
+        self.altura = 96
+
         self.direcao = "direita"
 
         # =======================
@@ -21,7 +26,9 @@ class Player:
             )
         ).convert_alpha()
 
-        self.idle_right = pygame.transform.scale(self.idle_right, (64, 64))
+        self.idle_right = pygame.transform.scale(
+            self.idle_right, (self.largura, self.altura)
+        )
 
         self.idle_left = pygame.image.load(
             os.path.join(
@@ -33,7 +40,9 @@ class Player:
             )
         ).convert_alpha()
 
-        self.idle_left = pygame.transform.scale(self.idle_left, (64, 64))
+        self.idle_left = pygame.transform.scale(
+            self.idle_left, (self.largura, self.altura)
+        )
 
         # =======================
         # Animação Direita
@@ -51,7 +60,10 @@ class Player:
                 )
             ).convert_alpha()
 
-            imagem = pygame.transform.scale(imagem, (64, 64))
+            imagem = pygame.transform.scale(
+                imagem, (self.largura, self.altura)
+            )
+
             self.animacao_direita.append(imagem)
 
         # =======================
@@ -70,69 +82,87 @@ class Player:
                 )
             ).convert_alpha()
 
-            imagem = pygame.transform.scale(imagem, (64, 64))
+            imagem = pygame.transform.scale(
+                imagem, (self.largura, self.altura)
+            )
+
             self.animacao_esquerda.append(imagem)
 
-        # Imagem inicial
         self.imagem = self.idle_right
 
-        # Controle da animação
         self.frame = 0
         self.velocidade_animacao = 0.2
 
         # Posição
-        self.x = x
-        self.y = y
+        self.x = float(x)
+        self.y = float(y)
 
-        # Velocidade do personagem
-        self.velocidade = 0.2
+        # Velocidade ajustada para telas maiores
+        self.velocidade = 5
 
-    def desenhar(self, janela):
-        janela.blit(self.imagem, (self.x, self.y))
+        # Instância da colisão (1400x760)
+        self.colisao = Colisao(largura=1400, altura=760)
+
+    def desenhar(self, janela, debug=False):
+        if debug:
+            self.colisao.desenhar_debug(janela)
+
+        janela.blit(self.imagem, (int(self.x), int(self.y)))
 
     def mover(self):
         teclas = pygame.key.get_pressed()
-
         andando = False
 
-        # ESQUERDA
+        dx = 0
+        dy = 0
+
         if teclas[pygame.K_a]:
-            self.x -= self.velocidade
+            dx -= self.velocidade
             self.direcao = "esquerda"
-
-            self.frame += self.velocidade_animacao
-
-            if self.frame >= len(self.animacao_esquerda):
-                self.frame = 0
-
-            self.imagem = self.animacao_esquerda[int(self.frame)]
             andando = True
 
-        # DIREITA
-        elif teclas[pygame.K_d]:
-            self.x += self.velocidade
+        if teclas[pygame.K_d]:
+            dx += self.velocidade
             self.direcao = "direita"
-
-            self.frame += self.velocidade_animacao
-
-            if self.frame >= len(self.animacao_direita):
-                self.frame = 0
-
-            self.imagem = self.animacao_direita[int(self.frame)]
             andando = True
 
-        # CIMA
         if teclas[pygame.K_w]:
-            self.y -= self.velocidade
+            dy -= self.velocidade
+            andando = True
 
-        # BAIXO
         if teclas[pygame.K_s]:
-            self.y += self.velocidade
+            dy += self.velocidade
+            andando = True
 
-        # Quando parar de andar
-        if not andando:
+        # Testar e aplicar movimento em X
+        if dx != 0:
+            novo_x = self.x + dx
+            pes_x = novo_x + (self.largura / 2)
+            pes_y = self.y + self.altura
+            if self.colisao.pode_andar(pes_x, pes_y):
+                self.x = novo_x
+
+        # Testar e aplicar movimento em Y
+        if dy != 0:
+            novo_y = self.y + dy
+            pes_x = self.x + (self.largura / 2)
+            pes_y = novo_y + self.altura
+            if self.colisao.pode_andar(pes_x, pes_y):
+                self.y = novo_y
+
+        # Atualizar Animações
+        if andando:
+            self.frame += self.velocidade_animacao
+            if self.direcao == "direita":
+                if self.frame >= len(self.animacao_direita):
+                    self.frame = 0
+                self.imagem = self.animacao_direita[int(self.frame)]
+            else:
+                if self.frame >= len(self.animacao_esquerda):
+                    self.frame = 0
+                self.imagem = self.animacao_esquerda[int(self.frame)]
+        else:
             self.frame = 0
-
             if self.direcao == "direita":
                 self.imagem = self.idle_right
             else:
