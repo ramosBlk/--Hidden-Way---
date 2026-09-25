@@ -44,6 +44,39 @@ class Player:
             self.idle_left, (self.largura, self.altura)
         )
 
+        # Tentativa de carregar idle para cima e para baixo do diretório rotations
+        try:
+            self.idle_up = pygame.image.load(
+                os.path.join(
+                    "assets",
+                    "sprites",
+                    "personagem_principal",
+                    "rotations",
+                    "north.png"
+                )
+            ).convert_alpha()
+            self.idle_up = pygame.transform.scale(
+                self.idle_up, (self.largura, self.altura)
+            )
+        except pygame.error:
+            self.idle_up = None
+
+        try:
+            self.idle_down = pygame.image.load(
+                os.path.join(
+                    "assets",
+                    "sprites",
+                    "personagem_principal",
+                    "rotations",
+                    "south.png"
+                )
+            ).convert_alpha()
+            self.idle_down = pygame.transform.scale(
+                self.idle_down, (self.largura, self.altura)
+            )
+        except pygame.error:
+            self.idle_down = None
+
         # =======================
         # Animação Direita
         # =======================
@@ -88,6 +121,56 @@ class Player:
 
             self.animacao_esquerda.append(imagem)
 
+        # =======================
+        # Animação Cima (run_up)
+        # =======================
+        self.animacao_cima = []
+
+        for i in range(1, 5):
+            imagem = pygame.image.load(
+                os.path.join(
+                    "assets",
+                    "sprites",
+                    "personagem_principal",
+                    "run_up",
+                    f"{i}.png"
+                )
+            ).convert_alpha()
+
+            imagem = pygame.transform.scale(
+                imagem, (self.largura, self.altura)
+            )
+
+            self.animacao_cima.append(imagem)
+
+        # =======================
+        # Animação Baixo (run_low)
+        # =======================
+        self.animacao_baixo = []
+
+        for i in range(1, 5):
+            imagem = pygame.image.load(
+                os.path.join(
+                    "assets",
+                    "sprites",
+                    "personagem_principal",
+                    "run_low",
+                    f"{i}.png"
+                )
+            ).convert_alpha()
+
+            imagem = pygame.transform.scale(
+                imagem, (self.largura, self.altura)
+            )
+
+            self.animacao_baixo.append(imagem)
+
+        # Fallbacks caso as imagens idle específicas de cima/baixo não existam
+        if self.idle_up is None:
+            self.idle_up = self.animacao_cima[0]
+        if self.idle_down is None:
+            self.idle_down = self.animacao_baixo[0]
+
         self.imagem = self.idle_right
 
         self.frame = 0
@@ -116,22 +199,28 @@ class Player:
         dx = 0
         dy = 0
 
-        if teclas[pygame.K_a]:
+        # Movimento Horizontal
+        if teclas[pygame.K_a] or teclas[pygame.K_LEFT]:
             dx -= self.velocidade
             self.direcao = "esquerda"
             andando = True
 
-        if teclas[pygame.K_d]:
+        if teclas[pygame.K_d] or teclas[pygame.K_RIGHT]:
             dx += self.velocidade
             self.direcao = "direita"
             andando = True
 
-        if teclas[pygame.K_w]:
+        # Movimento Vertical
+        if teclas[pygame.K_w] or teclas[pygame.K_UP]:
             dy -= self.velocidade
+            if dx == 0:
+                self.direcao = "cima"
             andando = True
 
-        if teclas[pygame.K_s]:
+        if teclas[pygame.K_s] or teclas[pygame.K_DOWN]:
             dy += self.velocidade
+            if dx == 0:
+                self.direcao = "baixo"
             andando = True
 
         # Testar e aplicar movimento em X
@@ -153,17 +242,34 @@ class Player:
         # Atualizar Animações
         if andando:
             self.frame += self.velocidade_animacao
+
             if self.direcao == "direita":
                 if self.frame >= len(self.animacao_direita):
                     self.frame = 0
                 self.imagem = self.animacao_direita[int(self.frame)]
-            else:
+
+            elif self.direcao == "esquerda":
                 if self.frame >= len(self.animacao_esquerda):
                     self.frame = 0
                 self.imagem = self.animacao_esquerda[int(self.frame)]
+
+            elif self.direcao == "cima":
+                if self.frame >= len(self.animacao_cima):
+                    self.frame = 0
+                self.imagem = self.animacao_cima[int(self.frame)]
+
+            elif self.direcao == "baixo":
+                if self.frame >= len(self.animacao_baixo):
+                    self.frame = 0
+                self.imagem = self.animacao_baixo[int(self.frame)]
+
         else:
             self.frame = 0
             if self.direcao == "direita":
                 self.imagem = self.idle_right
-            else:
+            elif self.direcao == "esquerda":
                 self.imagem = self.idle_left
+            elif self.direcao == "cima":
+                self.imagem = self.idle_up
+            elif self.direcao == "baixo":
+                self.imagem = self.idle_down
