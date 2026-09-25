@@ -2,8 +2,7 @@
 
 **Hidden Way** é um jogo 2D de plataforma e aventura desenvolvido como projeto da disciplina **Programação para Jogos**, do curso de Ciência da Computação da UNIPAC.
 
-O jogo foi inspirado em clássicos como **Fireboy and Watergirl (Fogo e Água)**, porém adaptado para uma experiência **single-player**, onde todos os desafios podem ser resolvidos utilizando apenas um personagem. :contentReference[oaicite:1]{index=1}
-
+O jogo foi inspirado em clássicos como **Fireboy and Watergirl (Fogo e Água)**, porém adaptado para uma experiência **single-player**, onde todos os desafios podem ser resolvidos utilizando apenas um personagem. 
 ---
 
 ## 📖 Sobre o jogo
@@ -111,4 +110,4 @@ python main.py
 
 ## 📚 Projeto Acadêmico
 
-Desenvolvido para a disciplina **Programação para Jogos** do curso de **Ciência da Computação** do Centro Universitário Presidente Antônio Carlos (UNIPAC), sob orientação do professor **Rodrigo Fernandes dos Santos**. :contentReference[oaicite:7]{index=7}
+___Desenvolvido para a disciplina **Programação para Jogos** do curso de **Ciência da Computação** do Centro Universitário Presidente Antônio Carlos (UNIPAC), sob orientação do professor **Rodrigo Fernandes dos Santos**.
