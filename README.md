@@ -10,7 +10,7 @@ O jogo foi inspirado em clássicos como **Fireboy and Watergirl (Fogo e Água)**
 
 Em **Hidden Way**, o jogador deverá explorar diferentes fases, atravessar plataformas, evitar armadilhas e resolver desafios para encontrar o caminho até a saída de cada nível.
 
-A dificuldade aumenta gradualmente conforme novas mecânicas e obstáculos são introduzidos, incentivando a exploração e o raciocínio do jogador. :contentReference[oaicite:2]{index=2}
+A dificuldade aumenta gradualmente conforme novas mecânicas e obstáculos são introduzidos, incentivando a exploração e o raciocínio do jogador.
 
 ---
 
@@ -24,7 +24,7 @@ O objetivo principal é concluir todas as fases, utilizando:
 - 🔍 Exploração do cenário
 - ⚠️ Desvio de obstáculos e armadilhas
 
-Cada fase apresenta novos desafios que exigem atenção e estratégia para alcançar a saída. :contentReference[oaicite:3]{index=3}
+Cada fase apresenta novos desafios que exigem atenção e estratégia para alcançar a saída. 
 
 ---
 
@@ -41,14 +41,13 @@ O jogo possui as seguintes mecânicas:
 - Progressão por fases
 - Dificuldade progressiva
 
-As mecânicas ainda estão sendo implementadas :contentReference[oaicite:4]{index=4}
+As mecânicas ainda estão sendo implementadas 
 
 ---
 
 ## ✨ Diferencial
 
-O grande diferencial do projeto é trazer a proposta de jogos como **Fireboy and Watergirl** para um modo **single-player**, mantendo a essência da exploração e da resolução de desafios, mas utilizando apenas um personagem. :contentReference[oaicite:5]{index=5}
-
+O grande diferencial do projeto é trazer a proposta de jogos como **Fireboy and Watergirl** para um modo **single-player**, mantendo a essência da exploração e da resolução de desafios, mas utilizando apenas um personagem. 
 ---
 
 ## 🛠️ Tecnologias
@@ -106,7 +105,7 @@ python main.py
 - Pedro Henrique Faria Silva
 - Pedro Henrique Ramos de Carvalho
 - Raphael Antonio Ferreira
-- Victor Hugo Silva de Assis :contentReference[oaicite:6]{index=6}
+- Victor Hugo Silva de Assis 
 
 ---
 
