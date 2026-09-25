@@ -14,7 +14,7 @@ pygame.display.set_caption("Hidden Way")
 player = Player()
 
 caminho_imagem = os.path.join(
-    "assets", "sprites", "telas", "Tela.png"
+    "assets", "sprites", "telas", "Tela_inicio.png"
 )
 imagem_original = pygame.image.load(caminho_imagem)
 imagem_principal = pygame.transform.scale(imagem_original, (LARGURA, ALTURA))
