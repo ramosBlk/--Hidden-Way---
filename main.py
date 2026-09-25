@@ -1,6 +1,5 @@
-import os
 import pygame
-
+from classes.cenario import Cenario
 from classes.player import Player
 
 pygame.init()
@@ -11,26 +10,49 @@ ALTURA = 760
 janela = pygame.display.set_mode((LARGURA, ALTURA))
 pygame.display.set_caption("Hidden Way")
 
-player = Player()
+cenario = Cenario("assets/sprites/telas/Tela_inicio.png", largura=LARGURA, altura=ALTURA, velocidade=3.5)
+player = Player(x=100, y=570)
 
-caminho_imagem = os.path.join(
-    "assets", "sprites", "telas", "Tela_inicio.png"
-)
-imagem_original = pygame.image.load(caminho_imagem)
-imagem_principal = pygame.transform.scale(imagem_original, (LARGURA, ALTURA))
+# Limites da câmera na tela
+LIMITE_DIREITO_TELA = 900
+LIMITE_ESQUERDO_TELA = 300
 
-loop = True
+relogio = pygame.time.Clock()
+rodando = True
 
-while loop:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            loop = False
+while rodando:
+    relogio.tick(60)
 
-    janela.blit(imagem_principal, (0, 0))
+    for evento in pygame.event.get():
+        if evento.type == pygame.QUIT:
+            rodando = False
 
-    # Agora quem desenha o personagem é a própria classe Player
-    player.desenhar(janela)
+    teclas = pygame.key.get_pressed()
+
+    # 1. Movimentação do personagem no mundo
     player.mover()
-    pygame.display.update()
+
+    # 2. Rolagem da Câmera / Cenário
+    # Avançando (Ir para a direita)
+    if player.x >= LIMITE_DIREITO_TELA and (teclas[pygame.K_d] or teclas[pygame.K_RIGHT]):
+        player.x = LIMITE_DIREITO_TELA
+        cenario.mover_cenario(player.velocidade, para_frente=True)
+
+    # Voltando (Ir para a esquerda)
+    elif player.x <= LIMITE_ESQUERDO_TELA and (teclas[pygame.K_a] or teclas[pygame.K_LEFT]) and cenario.distancia_percorrida > 0:
+        player.x = LIMITE_ESQUERDO_TELA
+        cenario.mover_cenario(player.velocidade, para_frente=False)
+
+    # 3. Limites físicos para o jogador não sair da janela
+    if player.x < 0:
+        player.x = 0
+    elif player.x > LARGURA - player.largura:
+        player.x = LARGURA - player.largura
+
+    # 4. Renderização
+    cenario.desenhar(janela)
+    player.desenhar(janela)
+
+    pygame.display.flip()
 
 pygame.quit()
