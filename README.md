@@ -90,6 +90,7 @@ cd --Hidden-Way---
 
 ```bash
 pip install pygame
+pip install pygame-ce
 ```
 
 4. Execute o jogo
