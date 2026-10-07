@@ -63,7 +63,8 @@ O grande diferencial do projeto é trazer a proposta de jogos como **Fireboy and
 ```
 Hidden Way/
 │
-├── assets/          # Imagens, sprites e recursos do jogo
+├── assets/          # Imagens, sprites
+├── classes/         #  player ... funções do jogo
 ├── main.py          # Arquivo principal
 ├── README.md
 └── .gitignore
