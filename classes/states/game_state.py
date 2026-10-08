@@ -6,8 +6,8 @@ class GameState:
         """Processa eventos de teclado/mouse específicos deste estado."""
         pass
 
-    def atualizar(self):
-        """Atualiza a lógica e a física deste estado."""
+    def atualizar(self, dt=1 / 60):
+        """Atualiza a lógica e a física deste estado (dt = segundos desde o último quadro)."""
         pass
 
     def desenhar(self, janela):

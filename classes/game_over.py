@@ -1,117 +1,99 @@
+import math
+import random
+
 import pygame
+
+from classes.ui import Botao, NavegadorBotoes, desenhar_placa, texto_pixel
 
 
 class GameOver:
+    """
+    Tela de Game Over (visual): cenário congelado escurecendo, placa de pedra que desce,
+    título que "bate" na tela, subtítulo e botões que aparecem em sequência.
+
+    tratar_evento() devolve "tentar" ou "menu" quando um botão é acionado.
+    """
+    T_PLACA = 0.5      # a placa termina de descer
+    T_TITULO = 0.9     # título aparece
+    T_BOTOES = 1.5     # botões aparecem e ficam clicáveis
 
     def __init__(self, largura=1400, altura=760):
         self.largura = largura
         self.altura = altura
+        self.tempo = 0.0
+        self.painel = pygame.Rect(0, 0, 700, 360)
+        self.painel.center = (largura // 2, altura // 2 + 10)
+        cx = largura // 2
+        self.botoes = NavegadorBotoes([
+            Botao("TENTAR NOVAMENTE", (cx, self.painel.bottom - 130)),
+            Botao("VOLTAR AO MENU", (cx, self.painel.bottom - 60)),
+        ])
+        self._acoes = ("tentar", "menu")
 
-        # Overlay escuro e sombrio de fundo
-        self.overlay = pygame.Surface((largura, altura), pygame.SRCALPHA)
-        self.overlay.fill((10, 5, 8, 240))
+    def atualizar(self, dt):
+        self.tempo += dt
 
-        # Fontes robustas para simular o estilo de jogo pixelado/arcade
-        self.fonte_titulo = pygame.font.SysFont("impact", 72)
-        self.fonte_botao = pygame.font.SysFont("arial", 20, bold=True)
+    def tratar_evento(self, evento):
+        if self.tempo < self.T_BOTOES:
+            return None
+        if evento.type == pygame.KEYDOWN and evento.key == pygame.K_r:  # atalho já existente
+            return "tentar"
+        i = self.botoes.tratar_evento(evento)
+        return self._acoes[i] if i is not None else None
 
-    def desenhar(self, janela, motivo=""):
-        """Desenha a tela de Game Over inspirada no estilo da referência."""
-        # 1. Fundo escuro cobrindo a tela
-        janela.blit(self.overlay, (0, 0))
+    def _desenhar_caveira(self, janela, cx, topo):
+        osso, osso_esc, vazio = (160, 165, 175), (130, 135, 145), (20, 15, 20)
+        pygame.draw.ellipse(janela, osso_esc, (cx - 100, topo - 35, 65, 50))
+        pygame.draw.ellipse(janela, osso_esc, (cx + 35, topo - 35, 65, 50))
+        pygame.draw.rect(janela, vazio, (cx - 80, topo - 18, 12, 15))
+        pygame.draw.rect(janela, vazio, (cx + 68, topo - 18, 12, 15))
+        pygame.draw.ellipse(janela, osso, (cx - 55, topo - 50, 110, 75))
+        pygame.draw.rect(janela, osso, (cx - 40, topo, 80, 30))
+        pygame.draw.rect(janela, vazio, (cx - 30, topo - 25, 20, 25))
+        pygame.draw.rect(janela, vazio, (cx + 10, topo - 25, 20, 25))
+        pygame.draw.polygon(janela, vazio, [(cx, topo - 5), (cx - 6, topo + 8), (cx + 6, topo + 8)])
+        for dx in (-24, -8, 8, 24):  # dentes
+            pygame.draw.rect(janela, vazio, (cx + dx - 1, topo + 14, 2, 14))
 
-        # Dimensões do painel principal de Game Over
-        larg_painel = 700
-        alt_painel = 320
-        x_painel = (self.largura - larg_painel) // 2
-        y_painel = (self.altura - alt_painel) // 2
+    def desenhar(self, janela, fundo=None, subtitulo="Você caiu no buraco!"):
+        t = self.tempo
+        if fundo is not None:
+            janela.blit(fundo, (0, 0))
+        # escurece o cenário suavemente
+        escuro = pygame.Surface((self.largura, self.altura), pygame.SRCALPHA)
+        escuro.fill((10, 5, 8, int(175 + 55 * min(1.0, t / 0.5))))
+        janela.blit(escuro, (0, 0))
 
-        # -------------------------------------------------------------
-        # 2. CRÂNIO E OSSOS NO TOPO DO PAINEL
-        # -------------------------------------------------------------
-        centro_x = self.largura // 2
-        topo_painel_y = y_painel
+        # placa desce com "quique" no final
+        k = min(1.0, t / self.T_PLACA)
+        desloc = -(self.painel.bottom + 80) * (1 - k) ** 2
+        if k >= 1.0:
+            desloc = 0
+        painel = self.painel.move(0, int(desloc))
+        cx = painel.centerx
 
-        # Crânio central (forma base simulada com círculos/retângulos estilo pixel)
-        pygame.draw.ellipse(janela, (160, 165, 175), (centro_x - 55, topo_painel_y - 50, 110, 75))  # Crânio maior
-        pygame.draw.rect(janela, (160, 165, 175), (centro_x - 40, topo_painel_y, 80, 30))  # Maxilar
-        # Olhos vazios do crânio
-        pygame.draw.rect(janela, (20, 15, 20), (centro_x - 30, topo_painel_y - 25, 20, 25))
-        pygame.draw.rect(janela, (20, 15, 20), (centro_x + 10, topo_painel_y - 25, 20, 25))
-        # Nariz do crânio
-        pygame.draw.polygon(janela, (20, 15, 20), [(centro_x, topo_painel_y - 5), (centro_x - 6, topo_painel_y + 8),
-                                                   (centro_x + 6, topo_painel_y + 8)])
+        desenhar_placa(janela, painel)
+        self._desenhar_caveira(janela, cx, painel.top)
 
-        # Crânios menores nas laterais
-        pygame.draw.ellipse(janela, (130, 135, 145), (centro_x - 100, topo_painel_y - 35, 65, 50))
-        pygame.draw.ellipse(janela, (130, 135, 145), (centro_x + 35, topo_painel_y - 35, 65, 50))
-        pygame.draw.rect(janela, (20, 15, 20), (centro_x - 80, topo_painel_y - 18, 12, 15))
-        pygame.draw.rect(janela, (20, 15, 20), (centro_x + 68, topo_painel_y - 18, 12, 15))
+        # título
+        if t >= self.T_TITULO - 0.25:
+            kt = min(1.0, (t - (self.T_TITULO - 0.25)) / 0.25)
+            titulo = texto_pixel("GAME OVER", 22, (190, 40, 40), escala=4, sombra=(40, 10, 12))
+            largura = int(titulo.get_width() * (1.6 - 0.6 * kt))
+            altura = int(titulo.get_height() * (1.6 - 0.6 * kt))
+            titulo = pygame.transform.scale(titulo, (largura, altura)).copy()
+            titulo.set_alpha(int(255 * kt))
+            tremor = (random.randint(-3, 3), random.randint(-3, 3)) if kt < 1.0 else (0, 0)
+            janela.blit(titulo, titulo.get_rect(center=(cx + tremor[0], painel.top + 85 + tremor[1])))
 
-        # -------------------------------------------------------------
-        # 3. PLACA DE PEDRA ESCURA PRINCIPAL
-        # -------------------------------------------------------------
-        # Sombra da placa
-        surf_sombra = pygame.Surface((larg_painel, alt_painel), pygame.SRCALPHA)
-        surf_sombra.fill((0, 0, 0, 180))
-        janela.blit(surf_sombra, (x_painel + 8, y_painel + 8))
+        # subtítulo
+        if t >= self.T_TITULO + 0.2:
+            ks = min(1.0, (t - self.T_TITULO - 0.2) / 0.3)
+            sub = texto_pixel(subtitulo, 10, (225, 215, 200), escala=2).copy()
+            sub.set_alpha(int(255 * ks))
+            janela.blit(sub, sub.get_rect(center=(cx, painel.top + 150)))
 
-        # Fundo da placa (cinza escuro / chumbo)
-        pygame.draw.rect(janela, (35, 42, 48), (x_painel, y_painel, larg_painel, alt_painel))
-        # Borda metálica/pedra da placa
-        pygame.draw.rect(janela, (95, 105, 115), (x_painel, y_painel, larg_painel, alt_painel), 6)
-        pygame.draw.rect(janela, (20, 25, 30), (x_painel + 6, y_painel + 6, larg_painel - 12, alt_painel - 12), 4)
-
-        # -------------------------------------------------------------
-        # 4. TEXTO "YOU DIED" VERMELHO SANGUE COM EFEITO
-        # -------------------------------------------------------------
-        # Sombra interna do texto
-        txt_sombra = self.fonte_titulo.render("YOU DIED", True, (40, 10, 12))
-        txt_principal = self.fonte_titulo.render("YOU DIED", True, (175, 35, 35))
-
-        rect_txt = txt_principal.get_rect(center=(centro_x, y_painel + alt_painel // 2))
-
-        janela.blit(txt_sombra, (rect_txt.x + 4, rect_txt.y + 4))
-        janela.blit(txt_principal, rect_txt)
-
-        # -------------------------------------------------------------
-        # 5. TEIAS DE ARANHA E TRINCAS SOBRE O TEXTO
-        # -------------------------------------------------------------
-        ponto_centro_teia = (centro_x, y_painel + alt_painel // 2)
-        cor_teia = (180, 185, 195, 160)  # Cinza claro translúcido
-
-        # Linhas principais da teia irradiando do centro
-        angulos = [0, 45, 90, 135, 180, 225, 270, 315]
-        for ang in angulos:
-            import math
-            rad = math.radians(ang)
-            fim_x = ponto_centro_teia[0] + int(math.cos(rad) * 280)
-            fim_y = ponto_centro_teia[1] + int(math.sin(rad) * 120)
-            pygame.draw.line(janela, (150, 155, 165), ponto_centro_teia, (fim_x, fim_y), 1)
-
-        # Arcos concêntricos da teia
-        pygame.draw.arc(janela, (160, 165, 175), (centro_x - 120, y_painel + 80, 240, 140), 0, 3.14, 1)
-        pygame.draw.arc(janela, (160, 165, 175), (centro_x - 220, y_painel + 50, 440, 200), 0, 3.14, 1)
-
-        # Manchas de sangue escorrendo dos crânios
-        pygame.draw.rect(janela, (140, 20, 20), (centro_x - 15, topo_painel_y + 45, 6, 25))
-        pygame.draw.rect(janela, (140, 20, 20), (centro_x + 35, topo_painel_y + 45, 4, 35))
-        pygame.draw.rect(janela, (140, 20, 20), (centro_x - 50, topo_painel_y + 35, 5, 20))
-
-        # -------------------------------------------------------------
-        # 6. BOTÃO "Return" NA PARTE INFERIOR
-        # -------------------------------------------------------------
-        larg_botao = 160
-        alt_botao = 45
-        x_botao = centro_x - (larg_botao // 2)
-        y_botao = y_painel + alt_painel - (alt_botao // 2)
-
-        # Fundo e borda do botão estilo moldura de pedra
-        pygame.draw.rect(janela, (40, 45, 55), (x_botao, y_botao, larg_botao, alt_botao))
-        pygame.draw.rect(janela, (110, 120, 135), (x_botao, y_botao, larg_botao, alt_botao), 3)
-        pygame.draw.rect(janela, (20, 22, 28), (x_botao + 3, y_botao + 3, larg_botao - 6, alt_botao - 6), 1)
-
-        # Texto do Botão ("Return")
-        txt_botao = self.fonte_botao.render("Return", True, (240, 240, 240))
-        rect_botao = txt_botao.get_rect(center=(centro_x, y_botao + alt_botao // 2))
-        janela.blit(txt_botao, rect_botao)
+        # botões
+        if t >= self.T_BOTOES - 0.3:
+            alpha = int(255 * min(1.0, (t - (self.T_BOTOES - 0.3)) / 0.3))
+            self.botoes.desenhar(janela, alpha)

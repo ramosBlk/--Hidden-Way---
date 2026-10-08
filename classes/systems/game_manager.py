@@ -10,9 +10,9 @@ class GameManager:
         if self.estado_atual:
             self.estado_atual.tratar_eventos(eventos)
 
-    def atualizar(self):
+    def atualizar(self, dt=1 / 60):
         if self.estado_atual:
-            self.estado_atual.atualizar()
+            self.estado_atual.atualizar(dt)
 
     def desenhar(self, janela):
         if self.estado_atual:

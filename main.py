@@ -20,7 +20,7 @@ rodando = True
 pygame.event.clear()
 
 while rodando:
-    relogio.tick(60)
+    dt = relogio.tick(60) / 1000.0  # segundos desde o último quadro
 
     # Coleta de eventos globais
     eventos = pygame.event.get()
@@ -30,7 +30,7 @@ while rodando:
 
     # Delega eventos, atualizações e renderizações para o estado atual ativo
     gerenciador.tratar_eventos(eventos)
-    gerenciador.atualizar()
+    gerenciador.atualizar(dt)
 
     janela.fill((0, 0, 0))
     gerenciador.desenhar(janela)

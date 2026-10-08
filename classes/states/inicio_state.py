@@ -31,7 +31,7 @@ class InicioState(GameState):
                         from classes.states.mapa1_state import Mapa1State
                         self.gerenciador.mudar_estado(Mapa1State(self.gerenciador, self.largura, self.altura))
 
-    def atualizar(self):
+    def atualizar(self, dt=1 / 60):
         self.player.atualizar_movimento(gravidade_ativada=False)
         self.tutorial.atualizar(self.player, self.cenario)
 

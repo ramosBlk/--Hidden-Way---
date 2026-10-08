@@ -137,6 +137,14 @@ class Player:
 
         self._atualizar_animacao(andando)
 
+    def hitbox(self):
+        """Retângulo de colisão do player (usado por itens, baú, caverna...)."""
+        return pygame.Rect(int(self.x) + self.hitbox_offset_x, int(self.y), self.hitbox_largura, self.altura)
+
+    def animar(self, andando):
+        """Avança a animação sem processar input (usado em cutscenes/andar automático)."""
+        self._atualizar_animacao(andando)
+
     def _atualizar_animacao(self, andando):
         """Gerencia os frames de animação do sprite."""
         if andando:

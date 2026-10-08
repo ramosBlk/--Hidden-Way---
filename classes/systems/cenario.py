@@ -2,7 +2,8 @@ import pygame
 
 
 class Cenario:
-    def __init__(self, caminho_imagem, caminho_segunda_imagem=None, largura=1400, altura=760, velocidade=3.5, eh_plataforma=False):
+    def __init__(self, caminho_imagem, caminho_segunda_imagem=None, largura=1400, altura=760, velocidade=3.5, eh_plataforma=False,
+                 plataformas=None, paredes=None):
         self.largura = largura
         self.altura = altura
         self.velocidade = velocidade
@@ -26,7 +27,7 @@ class Cenario:
         self.limite_maximo_distancia = largura
 
         # Lista de plataformas do Mapa 1 (caso eh_plataforma seja True)
-        self.plataformas = [
+        self.plataformas = plataformas if plataformas is not None else [
             pygame.Rect(126, 725, 848, 5),
             pygame.Rect(-8, 620, 162, 5),
             pygame.Rect(400, 448, 267, 9),
@@ -51,7 +52,7 @@ class Cenario:
 
         # Paredes e obstáculos sólidos do Mapa 1 (penhascos e corpos de rocha das ilhas).
         # Começam alguns px abaixo do topo das plataformas, para o player continuar pisando na grama.
-        self.paredes = [
+        self.paredes = paredes if paredes is not None else [
             # Penhascos da esquerda
             pygame.Rect(0, 185, 200, 30),
             pygame.Rect(0, 215, 120, 60),

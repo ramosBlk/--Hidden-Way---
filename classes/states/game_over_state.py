@@ -1,30 +1,45 @@
 import pygame
 from classes.states.game_state import GameState
-from classes.game_over import GameOver  # Importa a sua classe de arte/desenho
+from classes.game_over import GameOver
+from classes.systems.audio import Audio
 
 
 class GameOverState(GameState):
-    def __init__(self, gerenciador, largura, altura):
+    """
+    Estado de Game Over.
+    - fundo: último quadro do jogo (surface) para aparecer escurecido ao fundo.
+    - reiniciar: função sem argumentos que devolve o estado da fase a reiniciar.
+      Se não for informada, reinicia o Mapa 1.
+    """
+
+    def __init__(self, gerenciador, largura, altura, fundo=None, reiniciar=None, motivo="Você caiu no buraco!"):
         super().__init__(gerenciador)
         self.gerenciador = gerenciador
         self.largura = largura
         self.altura = altura
-
-        # Instancia a sua classe de visual de Game Over
+        self.fundo = fundo
+        self.motivo = motivo
+        self.reiniciar = reiniciar or self._reiniciar_mapa1
         self.tela_game_over = GameOver(largura=self.largura, altura=self.altura)
+        Audio.tocar("game_over")
+
+    def _reiniciar_mapa1(self):
+        from classes.states.mapa1_state import Mapa1State
+        return Mapa1State(self.gerenciador, self.largura, self.altura)
 
     def tratar_eventos(self, eventos):
         for evento in eventos:
-            if evento.type == pygame.KEYDOWN:
-                # Pressionar R ou ENTER recomeça o jogo voltando para o Mapa 1
-                if evento.key == pygame.K_r or evento.key == pygame.K_RETURN:
-                    from classes.states.mapa1_state import Mapa1State
-                    self.gerenciador.mudar_estado(Mapa1State(self.gerenciador, self.largura, self.altura))
+            acao = self.tela_game_over.tratar_evento(evento)
+            if acao == "tentar":
+                Audio.tocar("clique")
+                self.gerenciador.mudar_estado(self.reiniciar())
+            elif acao == "menu":
+                Audio.tocar("clique")
+                from classes.states.inicio_state import InicioState
+                self.gerenciador.mudar_estado(InicioState(self.gerenciador, self.largura, self.altura))
 
-    def atualizar(self):
-        pass
+    def atualizar(self, dt=1 / 60):
+        self.tela_game_over.atualizar(dt)
 
     def desenhar(self, janela):
-        # Primeiro desenha o fundo do Mapa 1 para que o painel apareça por cima congelando a cena
-        # (Ou pode deixar apenas a sua tela de Game Over renderizada)
-        self.tela_game_over.desenhar(janela, motivo="Queda")
+        self.tela_game_over.desenhar(janela, fundo=self.fundo, subtitulo=self.motivo)
