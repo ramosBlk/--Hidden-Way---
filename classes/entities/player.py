@@ -1,7 +1,7 @@
-import os
 import pygame
 from classes.systems.audio import Audio
 from classes.systems.colisao import Colisao
+from classes.systems.sprites_player import SpritesPlayer
 
 
 class Player:
@@ -11,7 +11,7 @@ class Player:
         self.altura = int(96 * escala)
         self.direcao = "direita"
 
-        # Hitbox de colisão: metade central da largura do sprite (as laterais da imagem são transparentes)
+        # Hitbox: metade central do sprite (as laterais da imagem são transparentes)
         self.hitbox_offset_x = int(self.largura * 0.25)
         self.hitbox_largura = int(self.largura * 0.5)
 
@@ -20,157 +20,119 @@ class Player:
         self.velocidade = 3.5
         self.colisao = Colisao(largura=1400, altura=760)
 
-        # Física, Pulo e Gravidade
+        # Física: altura do pulo ≈ forca_pulo² / (2 * gravidade)  (-13.5 ≈ 150 px)
         self.vel_x = 0
         self.vel_y = 0
         self.gravidade = 0.6
-        # Altura do pulo: quanto mais negativo, mais alto (altura ≈ forca_pulo² / (2 * gravidade))
-        # -11 ≈ 100 px | -12 ≈ 120 px | -13 ≈ 140 px
         self.forca_pulo = -13.5
         self.no_chao = False
 
-        # Sistema de Animação
+        # Animação
         self.frame = 0
         self.velocidade_animacao = 0.2
-        self._carregar_sprites()
-        self.imagem = self.idle_right
+        self.sprites = SpritesPlayer((self.largura, self.altura))
+        self.imagem = self.sprites.idle_de("direita")
 
-    def _carregar_sprites(self):
-        """Carrega e redimensiona todos os sprites do jogador."""
-
-        def carregar_imagem(caminho):
-            try:
-                img = pygame.image.load(caminho).convert_alpha()
-                return pygame.transform.scale(img, (self.largura, self.altura))
-            except (pygame.error, FileNotFoundError):
-                return pygame.Surface((self.largura, self.altura))
-
-        base_path = os.path.join("assets", "sprites", "personagem_principal")
-
-        # Idles
-        self.idle_right = carregar_imagem(os.path.join(base_path, "rotations", "south-east.png"))
-        self.idle_left = carregar_imagem(os.path.join(base_path, "rotations", "south-west.png"))
-        self.idle_up = carregar_imagem(os.path.join(base_path, "rotations", "north.png"))
-        self.idle_down = carregar_imagem(os.path.join(base_path, "rotations", "south.png"))
-
-        # Animações de movimento
-        self.animacao_direita = [carregar_imagem(os.path.join(base_path, "run_right", f"{i}.png")) for i in range(1, 5)]
-        self.animacao_esquerda = [carregar_imagem(os.path.join(base_path, "run_left", f"{i}.png")) for i in range(1, 5)]
-        self.animacao_cima = [carregar_imagem(os.path.join(base_path, "run_up", f"{i}.png")) for i in range(1, 5)]
-        self.animacao_baixo = [carregar_imagem(os.path.join(base_path, "run_low", f"{i}.png")) for i in range(1, 5)]
-
+    # ------------------------------------------------------------------ movimento
     def atualizar_movimento(self, gravidade_ativada=False, plataformas=None, paredes=None):
-        """Processa entradas do teclado, física e colisão de forma modular."""
+        """Lê o teclado e delega para o modo de movimento atual."""
         teclas = pygame.key.get_pressed()
-        andando = False
-        dx = 0
-        dy = 0
+        dx = self._ler_horizontal(teclas)
 
-        # Movimento Horizontal (A e D / Setas)
-        if teclas[pygame.K_a] or teclas[pygame.K_LEFT]:
-            dx -= self.velocidade
-            self.direcao = "esquerda"
-            andando = True
-        elif teclas[pygame.K_d] or teclas[pygame.K_RIGHT]:
-            dx += self.velocidade
-            self.direcao = "direita"
-            andando = True
-
-        if not gravidade_ativada:
-            # --- MODO TELA INICIAL (Top-down livre) ---
-            if teclas[pygame.K_w] or teclas[pygame.K_UP]:
-                dy -= self.velocidade
-                if dx == 0:
-                    self.direcao = "cima"
-                andando = True
-            elif teclas[pygame.K_s] or teclas[pygame.K_DOWN]:
-                dy += self.velocidade
-                if dx == 0:
-                    self.direcao = "baixo"
-                andando = True
-
-            # Aplica movimento X com verificação de área livre
-            if dx != 0:
-                novo_x = self.x + dx
-                if self.colisao.pode_andar(novo_x + (self.largura / 2), self.y + self.altura):
-                    self.x = novo_x
-
-            # Aplica movimento Y com verificação de área livre
-            if dy != 0 and not teclas[pygame.K_SPACE]:
-                novo_y = self.y + dy
-                if self.colisao.pode_andar(self.x + (self.largura / 2), novo_y + self.altura):
-                    self.y = novo_y
-
-            # Pulo simples na tela inicial
-            if teclas[pygame.K_SPACE] and self.no_chao:
-                self.vel_y = self.forca_pulo
-                self.no_chao = False
-
-            if not self.no_chao or self.vel_y != 0:
-                self.vel_y += self.gravidade
-                self.y += self.vel_y
-                if self.y >= 570:
-                    self.y = 570
-                    self.vel_y = 0
-                    self.no_chao = True
-
+        if gravidade_ativada:
+            self._mover_plataforma(teclas, dx, (plataformas or []) + (paredes or []))
+            andando = dx != 0
         else:
-            # --- MODO PLATAFORMA (Mapa 1) ---
-            self.vel_x = dx
-
-            # Pulo com Barra de Espaço
-            if teclas[pygame.K_SPACE] and self.no_chao:
-                self.vel_y = self.forca_pulo
-                self.no_chao = False
-                Audio.tocar("pulo")
-
-            # Aplica gravidade vertical
-            self.vel_y += self.gravidade
-
-            # Delega o movimento e a colisão horizontal/vertical (plataformas e paredes) para a classe Colisao
-            solidos = (plataformas or []) + (paredes or [])
-            if solidos:
-                self.colisao.tratar_colisao_plataforma(self, solidos)
-            else:
-                self.y += self.vel_y
-                self.x += self.vel_x
-                # Limites básicos da tela
-                self.x = max(0, min(self.x, 1400 - self.largura))
+            andando = self._mover_topdown(teclas, dx)
 
         self._atualizar_animacao(andando)
 
-    def hitbox(self):
-        """Retângulo de colisão do player (usado por itens, baú, caverna...)."""
-        return pygame.Rect(int(self.x) + self.hitbox_offset_x, int(self.y), self.hitbox_largura, self.altura)
+    def _ler_horizontal(self, teclas):
+        if teclas[pygame.K_a] or teclas[pygame.K_LEFT]:
+            self.direcao = "esquerda"
+            return -self.velocidade
+        if teclas[pygame.K_d] or teclas[pygame.K_RIGHT]:
+            self.direcao = "direita"
+            return self.velocidade
+        return 0
 
+    def _pular(self, com_som=False):
+        self.vel_y = self.forca_pulo
+        self.no_chao = False
+        if com_som:
+            Audio.tocar("pulo")
+
+    def _mover_topdown(self, teclas, dx):
+        """Tela inicial: movimento livre nos 4 sentidos + pulo simples. Retorna se está andando."""
+        dy = 0
+        if teclas[pygame.K_w] or teclas[pygame.K_UP]:
+            dy = -self.velocidade
+        elif teclas[pygame.K_s] or teclas[pygame.K_DOWN]:
+            dy = self.velocidade
+
+        if dy and dx == 0:
+            self.direcao = "cima" if dy < 0 else "baixo"
+
+        meio = self.largura / 2
+        if dx and self.colisao.pode_andar(self.x + dx + meio, self.y + self.altura):
+            self.x += dx
+        if dy and not teclas[pygame.K_SPACE] and self.colisao.pode_andar(self.x + meio, self.y + dy + self.altura):
+            self.y += dy
+
+        if teclas[pygame.K_SPACE] and self.no_chao:
+            self._pular()
+
+        if not self.no_chao or self.vel_y != 0:
+            self.vel_y += self.gravidade
+            self.y += self.vel_y
+            if self.y >= 570:
+                self.y, self.vel_y, self.no_chao = 570, 0, True
+
+        return dx != 0 or dy != 0
+
+    def _mover_plataforma(self, teclas, dx, solidos):
+        """Mapas de plataforma: gravidade + colisão com plataformas e paredes."""
+        self.vel_x = dx
+
+        if teclas[pygame.K_SPACE] and self.no_chao:
+            self._pular(com_som=True)
+
+        self.vel_y += self.gravidade
+
+        if solidos:
+            self.colisao.tratar_colisao_plataforma(self, solidos)
+        else:
+            self.y += self.vel_y
+            self.x = max(0, min(self.x + self.vel_x, 1400 - self.largura))
+
+    # ------------------------------------------------------------------ animação
     def animar(self, andando):
-        """Avança a animação sem processar input (usado em cutscenes/andar automático)."""
+        """Avança a animação sem processar input (cutscenes/andar automático)."""
         self._atualizar_animacao(andando)
 
     def _atualizar_animacao(self, andando):
-        """Gerencia os frames de animação do sprite."""
-        if andando:
-            self.frame += self.velocidade_animacao
-            anim_map = {
-                "direita": self.animacao_direita,
-                "esquerda": self.animacao_esquerda,
-                "cima": self.animacao_cima,
-                "baixo": self.animacao_baixo
-            }
-            lista_atual = anim_map.get(self.direcao, self.animacao_direita)
+        # No ar: o frame do pulo acompanha a física (0 = saída do chão, 0.5 = pico, 1 = queda)
+        if not self.no_chao:
+            pulo = self.sprites.pulo_de(self.direcao)
+            if pulo:
+                progresso = (self.vel_y - self.forca_pulo) / (-2 * self.forca_pulo)
+                self.imagem = pulo[max(0, min(len(pulo) - 1, int(progresso * len(pulo))))]
+                return
 
-            if self.frame >= len(lista_atual):
+        if andando:
+            lista = self.sprites.corrida_de(self.direcao)
+            self.frame += self.velocidade_animacao
+            if self.frame >= len(lista):
                 self.frame = 0
-            self.imagem = lista_atual[int(self.frame)]
+            self.imagem = lista[int(self.frame)]
         else:
             self.frame = 0
-            idle_map = {
-                "direita": self.idle_right,
-                "esquerda": self.idle_left,
-                "cima": self.idle_up,
-                "baixo": self.idle_down
-            }
-            self.imagem = idle_map.get(self.direcao, self.idle_right)
+            self.imagem = self.sprites.idle_de(self.direcao)
+
+    # ------------------------------------------------------------------ utilidades
+    def hitbox(self):
+        """Retângulo de colisão do player (usado por itens, baú, caverna...)."""
+        return pygame.Rect(int(self.x) + self.hitbox_offset_x, int(self.y), self.hitbox_largura, self.altura)
 
     def desenhar(self, janela, debug=False):
         if debug:
