@@ -30,11 +30,11 @@ class QuedaNoBuraco:
         self.quadro = None
         self.fade = None
 
-    def iniciar(self, player, particulas):
+    def iniciar(self, player, particulas, som="queda"):
         self.ativa = True
         self.tempo = 0.0
         self.fade = Fade(self.largura, self.altura, self.T_FADE, "saida", alpha_max=175)
-        Audio.tocar("queda")
+        Audio.tocar(som)
         particulas.emitir(player.x + player.largura / 2, player.y + player.altura, 14,
                           [(120, 150, 100), (200, 200, 190), (90, 70, 50)],
                           velocidade=(40, 140), vida=(0.4, 0.9), tam=(2, 4), gravidade=200, angulo=(20, 160))

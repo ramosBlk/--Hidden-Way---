@@ -36,6 +36,19 @@ class Hud:
         self.avisos = [a for a in self.avisos if a[1] > 0]
         self.pulso_chave = max(0.0, self.pulso_chave - dt)
 
+    def desenhar_contador(self, janela, atual, total):
+        """Contador de chaves das fases genéricas: ícone + atual/total."""
+        cx, cy = self.POS_CHAVE
+        placa = pygame.Rect(0, 0, 190, 44)
+        placa.center = (cx + 50, cy)
+        completo = atual >= total
+        desenhar_placa(janela, placa, (90, 190, 110) if completo else (160, 130, 50), (30, 28, 24))
+        escala = 1 + 0.5 * math.sin(self.pulso_chave / 0.5 * math.pi) if self.pulso_chave > 0 else 1
+        icone = pygame.transform.scale(self.icone_chave, (int(39 * escala), int(21 * escala)))
+        janela.blit(icone, icone.get_rect(center=(cx - 25, cy)))
+        cor = (170, 255, 190) if completo else (255, 230, 120)
+        janela.blit(texto_pixel(f"{atual}/{total}", 9, cor, escala=2), (cx + 6, cy - 9))
+
     def desenhar(self, janela, mostrar_chave):
         if mostrar_chave:
             escala = 1 + 0.5 * math.sin(self.pulso_chave / 0.5 * math.pi) if self.pulso_chave > 0 else 1

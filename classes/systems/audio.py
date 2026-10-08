@@ -1,4 +1,5 @@
 import math
+import random
 from array import array
 
 import pygame
@@ -23,6 +24,19 @@ class Audio:
         "game_over": [(330, 330, 0.18), (294, 294, 0.18), (262, 262, 0.18), (196, 196, 0.5)],
         "vitoria": [(523, 523, 0.12), (659, 659, 0.12), (784, 784, 0.12), (1047, 1047, 0.4)],
         "clique": [(880, 880, 0.04)],
+        "selecao": [(520, 520, 0.03)],
+        # frequência negativa = ruído (pedras, passos, impactos)
+        "pulo": [(280, 620, 0.12)],
+        "pisao": [(500, 160, 0.10), (-1, -1, 0.05)],
+        "inimigo_morre": [(400, 120, 0.16), (-1, -1, 0.08)],
+        "pedras": [(-1, -1, 0.25), (-1, -1, 0.2)],
+        "bau_rangido": [(110, 190, 0.18), (140, 90, 0.12)],
+        "brilho": [(1175, 1568, 0.12), (1568, 2093, 0.25)],
+        "chave_hud": [(1568, 1568, 0.05), (2093, 2093, 0.14)],
+        "porta": [(-1, -1, 0.12), (196, 392, 0.3), (784, 1175, 0.3)],
+        "espinho": [(900, 200, 0.12), (-1, -1, 0.1)],
+        "transicao": [(220, 880, 0.9)],
+        "aviso": [(660, 660, 0.05), (550, 550, 0.08)],
     }
 
     @classmethod
@@ -45,6 +59,11 @@ class Audio:
                         t = i / n
                         fase += 2 * math.pi * (f0 + (f1 - f0) * t) / freq
                         env = min(1.0, i / 80) * (1 - t) ** 0.7
+                        if f0 < 0:
+                            v = int(random.uniform(-1, 1) * 11000 * env)
+                            for _ in range(canais):
+                                amostras.append(v)
+                            continue
                         v = int(9000 * env * (1 if math.sin(fase) >= 0 else -1) * 0.6 + 6000 * env * math.sin(fase))
                         for _ in range(canais):
                             amostras.append(max(-32000, min(32000, v)))

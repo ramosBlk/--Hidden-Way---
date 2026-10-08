@@ -5,6 +5,7 @@ from enum import Enum
 import pygame
 
 from classes.systems.assets import carregar_imagem
+from classes.systems.audio import Audio
 
 
 class EstadoBau(Enum):
@@ -66,6 +67,7 @@ class Bau:
         frame = self._frame_atual()
         if frame != self._frame_anterior:
             self._frame_anterior = frame
+            Audio.tocar({1: "bau_rangido", 2: "bau_rangido", 3: "brilho"}[frame])
             self.particulas.emitir(self.rect.centerx, self.rect.top + 6, 10 if frame < 3 else 40,
                                    [(255, 230, 120), (255, 255, 200), (255, 190, 60)],
                                    velocidade=(50, 200), vida=(0.4, 1.0), tam=(2, 5), gravidade=140,

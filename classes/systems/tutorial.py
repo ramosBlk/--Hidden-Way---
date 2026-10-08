@@ -1,131 +1,75 @@
 import pygame
 
+from classes.ui import desenhar_placa, texto_pixel
+
+# (tecla, descrição)
+CONTROLES = [
+    ("A / D  ou  < >", "Andar para os lados"),
+    ("W / S  ou  ^ v", "Subir / descer (só no menu)"),
+    ("ESPAÇO", "Pular"),
+    ("E", "Interagir (baú, árvore)"),
+    ("R", "Tentar de novo (Game Over)"),
+]
+
+MECANICAS = [
+    "FASE 1: ache a CHAVE, abra o BAÚ",
+    "com [E] e entre na CAVERNA.",
+    "FASES 2 A 5: pegue TODAS as chaves",
+    "para destrancar a PORTA de saída.",
+    "Pule EM CIMA dos inimigos para",
+    "derrotá-los. Tocar neles = Game Over.",
+    "Cuidado com ESPINHOS e BURACOS!",
+]
+
 
 class Tutorial:
+    """
+    Tutorial ESTÁTICO exibido na tela inicial: controles e explicação das mecânicas.
+    Não depende mais do progresso do jogador (sem instruções passo a passo).
+    """
+
     def __init__(self, largura, altura):
         self.largura = largura
         self.altura = altura
-
-        # Estado atual do tutorial (1 a 4)
-        self.passo_atual = 1
-        self.concluido = False
-
-        # Variáveis para o efeito de texto digitado (máquina de escrever)
-        self.texto_completo = ""
-        self.texto_atual_exibido = ""
-        self.indice_letra = 0
-        self.tempo_ultimo_caractere = 0
-        self.velocidade_digitacao = 45  # Milissegundos por letra
-
-        # Fontes maiores e com boa legibilidade direto na tela
-        self.fonte_texto = pygame.font.SysFont("arial", 28, bold=True)
-
-        # Mensagens dos passos
-        self.mensagens = {
-            1: "Pressione D para andar para frente.",
-            2: "Ótimo! Agora pressione A para voltar.",
-            3: "Excelente! Pressione W para cima e S para baixo.",
-            4: "Perfeito! Pressione ESPAÇO para pular.\nVá até a árvore gigante para iniciar sua jornada."
-        }
-
-        self.atualizar_texto_passo()
-
-        self.distancia_caminhada = 0
-        self.usou_w = False
-        self.usou_s = False
-
-    def atualizar_texto_passo(self):
-        """Atualiza o texto completo com base no passo e reseta a digitação"""
-        self.texto_completo = self.mensagens.get(self.passo_atual, "")
-        self.texto_atual_exibido = ""
-        self.indice_letra = 0
-        self.tempo_ultimo_caractere = pygame.time.get_ticks()
+        self.concluido = True      # a árvore já pode ser usada desde o início
+        self._painel = None
 
     def atualizar(self, player, cenario):
-        if self.concluido:
-            return
+        pass  # estático
 
-        # Tutorial opcional: chegar na árvore conclui o tutorial em qualquer passo
-        if cenario.distancia_percorrida >= cenario.limite_maximo_distancia:
-            self.concluido = True
-            return
+    def _montar_painel(self):
+        painel = pygame.Surface((960, 330), pygame.SRCALPHA)
+        painel.fill((0, 0, 0, 0))
+        base = pygame.Surface(painel.get_size(), pygame.SRCALPHA)
+        desenhar_placa(base, pygame.Rect(0, 0, 944, 314), (160, 130, 50), (24, 26, 34))
+        base.set_alpha(225)
+        painel.blit(base, (0, 0))
 
-        # Efeito de máquina de escrever
-        tempo_atual = pygame.time.get_ticks()
-        if self.indice_letra < len(self.texto_completo):
-            if tempo_atual - self.tempo_ultimo_caractere > self.velocidade_digitacao:
-                self.texto_atual_exibido += self.texto_completo[self.indice_letra]
-                self.indice_letra += 1
-                self.tempo_ultimo_caractere = tempo_atual
+        titulo = texto_pixel("COMO JOGAR", 14, (255, 214, 74), escala=3, sombra=(70, 40, 10))
+        painel.blit(titulo, titulo.get_rect(midtop=(472, 18)))
 
-        teclas = pygame.key.get_pressed()
+        # coluna esquerda: controles
+        painel.blit(texto_pixel("CONTROLES", 9, (170, 220, 255), escala=2), (36, 76))
+        for i, (tecla, desc) in enumerate(CONTROLES):
+            y = 112 + i * 34
+            cap = texto_pixel(tecla, 9, (255, 255, 255), escala=2)
+            caixa = pygame.Rect(36, y - 3, 150, 26)
+            pygame.draw.rect(painel, (50, 56, 70), caixa)
+            pygame.draw.rect(painel, (150, 160, 180), caixa, 2)
+            painel.blit(cap, cap.get_rect(center=caixa.center))
+            painel.blit(texto_pixel(desc, 9, (225, 225, 230), escala=2), (200, y))
 
-        # ==========================================
-        # PASSO 1: Andar para a frente (Tecla D)
-        # ==========================================
-        if self.passo_atual == 1:
-            if teclas[pygame.K_d] or teclas[pygame.K_RIGHT]:
-                self.distancia_caminhada += abs(player.velocidade)
-                if self.distancia_caminhada > 150:
-                    self.passo_atual = 2
-                    self.atualizar_texto_passo()
-                    self.distancia_caminhada = 0
+        # coluna direita: mecânicas
+        painel.blit(texto_pixel("COMO FUNCIONA", 9, (170, 255, 190), escala=2), (500, 76))
+        for i, linha in enumerate(MECANICAS):
+            painel.blit(texto_pixel(linha, 9, (235, 235, 225), escala=2), (500, 112 + i * 24))
 
-        # ==========================================
-        # PASSO 2: Andar para trás (Tecla A)
-        # ==========================================
-        elif self.passo_atual == 2:
-            if teclas[pygame.K_a] or teclas[pygame.K_LEFT]:
-                self.distancia_caminhada += abs(player.velocidade)
-                if self.distancia_caminhada > 120:
-                    self.passo_atual = 3
-                    self.atualizar_texto_passo()
-
-        # ==========================================
-        # PASSO 3: Usar W (cima) e S (baixo)
-        # ==========================================
-        elif self.passo_atual == 3:
-            if teclas[pygame.K_w] or teclas[pygame.K_UP]:
-                self.usou_w = True
-            if teclas[pygame.K_s] or teclas[pygame.K_DOWN]:
-                self.usou_s = True
-
-            if self.usou_w and self.usou_s:
-                self.passo_atual = 4
-                self.atualizar_texto_passo()
-
-        # ==========================================
-        # PASSO 4: Ir até a árvore gigante
-        # ==========================================
-        elif self.passo_atual == 4:
-            if cenario.distancia_percorrida >= cenario.limite_maximo_distancia:
-                self.concluido = True
+        rodape = texto_pixel("Chegue até a ÁRVORE GIGANTE à direita e pressione [E] para começar!",
+                             9, (255, 244, 170), escala=2)
+        painel.blit(rodape, rodape.get_rect(midbottom=(472, 300)))
+        return painel
 
     def desenhar(self, janela):
-        if self.concluido:
-            return
-
-        # Posição Y mais abaixo no topo da tela, centralizada horizontalmente
-        y_pos = 50
-
-        # Renderiza o texto linha por linha diretamente na janela (sem caixas)
-        if "\n" in self.texto_atual_exibido:
-            linhas = self.texto_atual_exibido.split("\n")
-            for i, linha in enumerate(linhas):
-                txt_render = self.fonte_texto.render(linha, True, (255, 255, 255))
-
-                # Sombra preta para destacar o texto no fundo
-                sombra_render = self.fonte_texto.render(linha, True, (0, 0, 0))
-
-                x_pos = (self.largura - txt_render.get_width()) // 2
-
-                janela.blit(sombra_render, (x_pos + 2, y_pos + (i * 35) + 2))
-                janela.blit(txt_render, (x_pos, y_pos + (i * 35)))
-        else:
-            txt_render = self.fonte_texto.render(self.texto_atual_exibido, True, (255, 255, 255))
-            sombra_render = self.fonte_texto.render(self.texto_atual_exibido, True, (0, 0, 0))
-
-            x_pos = (self.largura - txt_render.get_width()) // 2
-
-            janela.blit(sombra_render, (x_pos + 2, y_pos + 2))
-            janela.blit(txt_render, (x_pos, y_pos))
+        if self._painel is None:
+            self._painel = self._montar_painel()
+        janela.blit(self._painel, self._painel.get_rect(midtop=(self.largura // 2, 12)))

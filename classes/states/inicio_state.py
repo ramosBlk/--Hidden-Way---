@@ -46,18 +46,5 @@ class InicioState(GameState):
     def desenhar(self, janela):
         self.cenario.desenhar(janela)
 
-        # Aviso de interatividade na árvore
-        if self.tutorial.concluido and self.cenario.distancia_percorrida >= self.cenario.limite_maximo_distancia - 50:
-            fonte_interacao = pygame.font.SysFont("arial", 18, bold=True)
-            texto_aviso = "[E] para Entrar"
-            txt_surf = fonte_interacao.render(texto_aviso, True, (255, 255, 255))
-            txt_sombra = fonte_interacao.render(texto_aviso, True, (0, 0, 0))
-
-            pos_x = self.largura - 350
-            pos_y = self.altura // 2 + 50
-
-            janela.blit(txt_sombra, (pos_x + 1, pos_y + 1))
-            janela.blit(txt_surf, (pos_x, pos_y))
-
         self.tutorial.desenhar(janela)
         self.player.desenhar(janela)

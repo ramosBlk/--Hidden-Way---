@@ -226,36 +226,147 @@ def gerar_caverna_bloqueada():
 
 
 # ---------------------------------------------------------------- fundo da fase 2 (350x190 -> 1400x760)
-def gerar_fundo_caverna():
-    rnd = random.Random(11)
+TEMAS = {
+    # nome: (seed, topo, base, silhueta1, silhueta2, estalactite, cristal, brilho_cristal, poeira)
+    "Mapa_2": (11, (18, 14, 38), (32, 24, 60), (30, 26, 56), (22, 19, 42), (12, 10, 26),
+               (70, 200, 230), (210, 250, 255), ((90, 80, 140), (60, 160, 190))),
+    "Mapa_3": (23, (8, 22, 24), (18, 40, 38), (16, 44, 40), (10, 32, 30), (6, 18, 18),
+               (110, 230, 120), (225, 255, 200), ((70, 150, 90), (150, 220, 110))),
+    "Mapa_4": (37, (20, 24, 50), (44, 60, 100), (48, 62, 108), (34, 46, 84), (18, 22, 46),
+               (150, 220, 255), (255, 255, 255), ((130, 170, 230), (200, 230, 255))),
+    "Mapa_5": (53, (34, 10, 12), (72, 24, 18), (70, 24, 22), (48, 16, 16), (22, 6, 8),
+               (255, 150, 50), (255, 240, 170), ((200, 80, 40), (255, 170, 60))),
+}
+
+
+def gerar_fundo_caverna(tema="Mapa_2"):
+    seed, topo, base, sil1, sil2, estal, cristal, brilho_c, poeira = TEMAS[tema]
+    rnd = random.Random(seed)
     w, h = 350, 190
     s = pygame.Surface((w, h))
     for y in range(h):
         t = y / h
-        pygame.draw.line(s, (int(18 + 14 * t), int(14 + 10 * t), int(38 + 22 * t)), (0, y), (w, y))
+        pygame.draw.line(s, tuple(int(a + (b - a) * t) for a, b in zip(topo, base)), (0, y), (w, y))
 
-    def silhueta(cor, base, amp, passo):
+    def silhueta(cor, base_y, amp, passo):
         pts = [(0, h)]
         for x in range(0, w + passo, passo):
-            pts.append((x, base - rnd.randint(0, amp)))
+            pts.append((x, base_y - rnd.randint(0, amp)))
         pts.append((w, h))
         pygame.draw.polygon(s, cor, pts)
 
-    silhueta((30, 26, 56), 140, 40, 9)
-    silhueta((22, 19, 42), 160, 28, 7)
+    silhueta(sil1, 140, 40, 9)
+    silhueta(sil2, 160, 28, 7)
     for x in range(0, w, 7):  # estalactites
         comp = rnd.randint(6, 34)
-        pygame.draw.polygon(s, (12, 10, 26), [(x, 0), (x + 7, 0), (x + 3 + rnd.randint(-1, 1), comp)])
+        pygame.draw.polygon(s, estal, [(x, 0), (x + 7, 0), (x + 3 + rnd.randint(-1, 1), comp)])
     for _ in range(14):  # cristais brilhantes
         cx, cy = rnd.randint(8, w - 8), rnd.randint(120, 175)
         for i in range(rnd.randint(2, 4)):
             altura = rnd.randint(6, 14)
             xx = cx + i * 3
-            pygame.draw.polygon(s, (70, 200, 230), [(xx, cy), (xx + 2, cy), (xx + 1, cy - altura)])
-            s.set_at((xx + 1, cy - altura + 2), (210, 250, 255))
+            pygame.draw.polygon(s, cristal, [(xx, cy), (xx + 2, cy), (xx + 1, cy - altura)])
+            s.set_at((xx + 1, cy - altura + 2), brilho_c)
     for _ in range(60):  # poeira
-        s.set_at((rnd.randint(0, w - 1), rnd.randint(0, h - 1)), rnd.choice(((90, 80, 140), (60, 160, 190))))
+        s.set_at((rnd.randint(0, w - 1), rnd.randint(0, h - 1)), rnd.choice(poeira))
     return s
+
+
+# ---------------------------------------------------------------- inimigos, espinhos e porta
+def _desenhar_ascii(linhas, paleta):
+    s = nova(len(linhas[0]), len(linhas))
+    for y, linha in enumerate(linhas):
+        for x, c in enumerate(linha):
+            if c in paleta:
+                s.set_at((x, y), paleta[c])
+    return s
+
+
+def gerar_slime(frame):
+    pal = {"g": (92, 190, 80), "d": (52, 130, 60), "l": (170, 240, 150), "w": (255, 255, 255), "k": (20, 30, 20)}
+    if frame == 0:
+        linhas = ["....gggggg....",
+                  "..gglllllggg..",
+                  ".gglllgggggdg.",
+                  ".ggwkgggwkggd.",
+                  "gggwkgggwkgggd",
+                  "ggggggggggggdd",
+                  "gddddddddddddd"]
+    else:
+        linhas = ["..............",
+                  "...gggggggg...",
+                  ".ggllllllgggg.",
+                  "ggglgwkggwkgdg",
+                  "ggggggwkggwkgg"[:14],
+                  "gggggggggggggd",
+                  "gddddddddddddd"]
+    return contorno(_desenhar_ascii(linhas, pal), (20, 40, 24))
+
+
+def gerar_morcego(frame):
+    pal = {"p": (110, 70, 160), "d": (70, 40, 110), "l": (160, 120, 210), "r": (255, 60, 60), "w": (255, 255, 255)}
+    if frame == 0:  # asas para cima
+        linhas = ["d..............d",
+                  "dd............dd",
+                  "dpd..pppppp..dpd",
+                  "dppdppppppppdppd",
+                  ".dpppprppprpppd.",
+                  "..ddpppppppppdd.",
+                  "....dpwpppwpd...",
+                  ".....d.pp.d....."]
+    else:  # asas para baixo
+        linhas = ["................",
+                  "................",
+                  "....pppppppp....",
+                  "..dpppprppprppd.",
+                  ".dppdppppppppdpd",
+                  "dpd.dpwpppwpd.dp",
+                  "dd...d.pp.d...dd",
+                  "d..............d"]
+    return contorno(_desenhar_ascii([l.ljust(16, ".")[:16] for l in linhas], pal), (24, 12, 40))
+
+
+def gerar_espinho():
+    pal = {"m": (200, 205, 215), "d": (110, 116, 130), "l": (245, 248, 255)}
+    linhas = ["...l....l....l...",
+              "...m....m....m...",
+              "..lmd..lmd..lmd..",
+              "..mmd..mmd..mmd..",
+              ".lmmdd.lmmdd.lmmd",
+              ".mmmdd.mmmdd.mmmd",
+              "lmmmddlmmmddlmmmd",
+              "ddddddddddddddddd"]
+    return contorno(_desenhar_ascii([l[:17] for l in linhas], pal), (40, 40, 52))
+
+
+def gerar_porta(aberta):
+    s = nova(20, 28)
+    pedra, pedra_esc, pedra_cla = (112, 114, 120), (78, 80, 90), (150, 152, 158)
+    pygame.draw.rect(s, pedra_esc, (0, 6, 20, 22))
+    pygame.draw.rect(s, pedra, (1, 6, 18, 22))
+    pygame.draw.rect(s, pedra_esc, (3, 0, 14, 8))
+    pygame.draw.rect(s, pedra_cla, (4, 1, 12, 2))
+    for y in (10, 16, 22):  # juntas de pedra
+        pygame.draw.line(s, pedra_esc, (1, y), (4, y))
+        pygame.draw.line(s, pedra_esc, (16, y), (19, y))
+    vao = (4, 5, 12, 23)
+    if aberta:
+        pygame.draw.rect(s, (30, 22, 30), vao)
+        pygame.draw.rect(s, (255, 240, 170), (6, 8, 8, 20))
+        pygame.draw.rect(s, (255, 252, 225), (8, 10, 4, 18))
+        pygame.draw.rect(s, (30, 22, 30), (4, 5, 2, 23))
+        pygame.draw.rect(s, (30, 22, 30), (14, 5, 2, 23))
+    else:
+        pygame.draw.rect(s, (62, 52, 46), vao)
+        for x in (6, 9, 12, 15):  # tábuas
+            pygame.draw.line(s, (40, 32, 28), (x, 5), (x, 27))
+        for y in (9, 22):  # tiras de ferro
+            pygame.draw.rect(s, (130, 130, 138), (4, y, 12, 2))
+        pygame.draw.rect(s, OUT, (8, 13, 5, 6))
+        pygame.draw.rect(s, OURO, (9, 14, 3, 4))
+        s.set_at((10, 15), OUT)
+        s.set_at((10, 16), OUT)
+    return contorno(s, (30, 30, 38))
 
 
 def main():
@@ -266,7 +377,14 @@ def main():
     salvar(gerar_caverna_bloqueada(), os.path.join(base, "itens", "caverna_bloqueada.png"))
     salvar(gerar_luz_caverna(), os.path.join(base, "itens", "caverna_liberada.png"), escala=2)
     salvar(gerar_brilho(16), os.path.join(base, "efeitos", "brilho.png"))
-    salvar(gerar_fundo_caverna(), os.path.join(base, "telas", "Mapa_2.png"), escala=4)
+    for tema in TEMAS:
+        salvar(gerar_fundo_caverna(tema), os.path.join(base, "telas", f"{tema}.png"), escala=4)
+    for f in range(2):
+        salvar(gerar_slime(f), os.path.join(base, "inimigos", f"slime_{f}.png"))
+        salvar(gerar_morcego(f), os.path.join(base, "inimigos", f"morcego_{f}.png"))
+    salvar(gerar_espinho(), os.path.join(base, "itens", "espinho.png"))
+    salvar(gerar_porta(False), os.path.join(base, "itens", "porta_0.png"))
+    salvar(gerar_porta(True), os.path.join(base, "itens", "porta_1.png"))
 
 
 if __name__ == "__main__":

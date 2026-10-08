@@ -92,6 +92,7 @@ class Mapa1State(GameState):
 
         if self.chave.atualizar(dt):
             self.hud.chave_recebida()
+            Audio.tocar("chave_hud")
         if self.bau.atualizar(dt):
             self._bau_aberto()
 
@@ -158,14 +159,15 @@ class Mapa1State(GameState):
 
         if self.tempo_estado >= 0.9 and self.fade_saida is None:
             self.fade_saida = Fade(self.largura, self.altura, 1.0, "saida")
+            Audio.tocar("transicao")
         if self.fade_saida:
             self.fade_saida.atualizar(dt)
             if self.fade_saida.concluido:
                 from classes.states.fase_completa_state import FaseCompletaState
-                from classes.states.mapa2_state import Mapa2State
+                from classes.systems.fases import proxima_fase
                 self.gerenciador.mudar_estado(FaseCompletaState(
                     self.gerenciador, self.largura, self.altura,
-                    proxima_fase=lambda: Mapa2State(self.gerenciador, self.largura, self.altura)))
+                    **proxima_fase(0, self.gerenciador, self.largura, self.altura)))
 
     # ------------------------------------------------------------------ desenho
     def desenhar(self, janela):

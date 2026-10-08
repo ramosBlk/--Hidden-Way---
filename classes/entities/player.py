@@ -1,5 +1,6 @@
 import os
 import pygame
+from classes.systems.audio import Audio
 from classes.systems.colisao import Colisao
 
 
@@ -121,6 +122,7 @@ class Player:
             if teclas[pygame.K_SPACE] and self.no_chao:
                 self.vel_y = self.forca_pulo
                 self.no_chao = False
+                Audio.tocar("pulo")
 
             # Aplica gravidade vertical
             self.vel_y += self.gravidade

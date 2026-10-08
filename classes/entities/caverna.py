@@ -5,6 +5,7 @@ from enum import Enum
 import pygame
 
 from classes.systems.assets import carregar_imagem
+from classes.systems.audio import Audio
 
 
 class EstadoCaverna(Enum):
@@ -45,6 +46,7 @@ class Caverna:
             return
         self.estado = EstadoCaverna.LIBERANDO
         self.tempo = 0.0
+        Audio.tocar("pedras")
         self.particulas.emitir(*self.CENTRO, 36, [(112, 114, 120), (88, 90, 98), (140, 142, 148)],
                                velocidade=(30, 130), vida=(0.5, 1.1), tam=(3, 6), gravidade=300,
                                area=(26, 28))

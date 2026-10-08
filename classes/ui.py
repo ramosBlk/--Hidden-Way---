@@ -1,4 +1,5 @@
 import pygame
+from classes.systems.audio import Audio
 
 _cache_fontes = {}
 _cache_textos = {}
@@ -74,8 +75,9 @@ class NavegadorBotoes:
         """Retorna o índice do botão acionado, ou None."""
         if evento.type == pygame.MOUSEMOTION:
             for i, b in enumerate(self.botoes):
-                if b.rect.collidepoint(evento.pos):
+                if b.rect.collidepoint(evento.pos) and self.indice != i:
                     self.indice = i
+                    Audio.tocar("selecao")
         elif evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
             for i, b in enumerate(self.botoes):
                 if b.rect.collidepoint(evento.pos):
@@ -84,8 +86,10 @@ class NavegadorBotoes:
         elif evento.type == pygame.KEYDOWN:
             if evento.key in (pygame.K_UP, pygame.K_w):
                 self.indice = (self.indice - 1) % len(self.botoes)
+                Audio.tocar("selecao")
             elif evento.key in (pygame.K_DOWN, pygame.K_s):
                 self.indice = (self.indice + 1) % len(self.botoes)
+                Audio.tocar("selecao")
             elif evento.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
                 return self.indice
         return None
