@@ -10,16 +10,22 @@ class Player:
         self.altura = int(96 * escala)
         self.direcao = "direita"
 
+        # Hitbox de colisão: metade central da largura do sprite (as laterais da imagem são transparentes)
+        self.hitbox_offset_x = int(self.largura * 0.25)
+        self.hitbox_largura = int(self.largura * 0.5)
+
         self.x = float(x)
         self.y = float(y)
-        self.velocidade = 5
+        self.velocidade = 3.5
         self.colisao = Colisao(largura=1400, altura=760)
 
         # Física, Pulo e Gravidade
         self.vel_x = 0
         self.vel_y = 0
         self.gravidade = 0.6
-        self.forca_pulo = -11
+        # Altura do pulo: quanto mais negativo, mais alto (altura ≈ forca_pulo² / (2 * gravidade))
+        # -11 ≈ 100 px | -12 ≈ 120 px | -13 ≈ 140 px
+        self.forca_pulo = -13.5
         self.no_chao = False
 
         # Sistema de Animação
@@ -52,7 +58,7 @@ class Player:
         self.animacao_cima = [carregar_imagem(os.path.join(base_path, "run_up", f"{i}.png")) for i in range(1, 5)]
         self.animacao_baixo = [carregar_imagem(os.path.join(base_path, "run_low", f"{i}.png")) for i in range(1, 5)]
 
-    def atualizar_movimento(self, gravidade_ativada=False, plataformas=None):
+    def atualizar_movimento(self, gravidade_ativada=False, plataformas=None, paredes=None):
         """Processa entradas do teclado, física e colisão de forma modular."""
         teclas = pygame.key.get_pressed()
         andando = False
@@ -118,12 +124,13 @@ class Player:
 
             # Aplica gravidade vertical
             self.vel_y += self.gravidade
-            self.y += self.vel_y
 
-            # Delega a física de colisão horizontal/vertical de plataformas para a classe Colisao
-            if plataformas:
-                self.colisao.tratar_colisao_plataforma(self, plataformas)
+            # Delega o movimento e a colisão horizontal/vertical (plataformas e paredes) para a classe Colisao
+            solidos = (plataformas or []) + (paredes or [])
+            if solidos:
+                self.colisao.tratar_colisao_plataforma(self, solidos)
             else:
+                self.y += self.vel_y
                 self.x += self.vel_x
                 # Limites básicos da tela
                 self.x = max(0, min(self.x, 1400 - self.largura))

@@ -26,8 +26,9 @@ class Mapa1State(GameState):
         pass
 
     def atualizar(self):
-        # Atualiza a movimentação com gravidade ativada e colisão com as plataformas
-        self.player.atualizar_movimento(gravidade_ativada=True, plataformas=self.cenario.plataformas)
+        # Atualiza a movimentação com gravidade ativada e colisão com as plataformas e paredes
+        self.player.atualizar_movimento(gravidade_ativada=True, plataformas=self.cenario.plataformas,
+                                        paredes=self.cenario.paredes)
 
         # Se cair da tela, muda para o estado de Game Over
         if self.player.y > self.altura:

@@ -49,24 +49,53 @@ class Cenario:
             pygame.Rect(1258, 435, 172, 5),
         ]
 
+        # Paredes e obstáculos sólidos do Mapa 1 (penhascos e corpos de rocha das ilhas).
+        # Começam alguns px abaixo do topo das plataformas, para o player continuar pisando na grama.
+        self.paredes = [
+            # Penhascos da esquerda
+            pygame.Rect(0, 185, 200, 30),
+            pygame.Rect(0, 215, 120, 60),
+            pygame.Rect(0, 275, 35, 170),
+            pygame.Rect(0, 455, 215, 25),
+            pygame.Rect(0, 480, 100, 45),
+            pygame.Rect(0, 525, 55, 90),
+            pygame.Rect(0, 628, 150, 132),
+            # Penhascos da direita
+            pygame.Rect(1240, 239, 160, 35),
+            pygame.Rect(1300, 274, 100, 20),
+            pygame.Rect(1345, 294, 55, 136),
+            pygame.Rect(1250, 441, 150, 40),
+            pygame.Rect(1345, 481, 55, 74),
+            pygame.Rect(1165, 566, 57, 48),
+            pygame.Rect(1222, 566, 178, 84),
+            pygame.Rect(1290, 650, 110, 110),
+            # Ilhas flutuantes e rochas
+            pygame.Rect(250, 543, 160, 45),
+            pygame.Rect(280, 588, 100, 40),
+            pygame.Rect(425, 458, 240, 45),
+            pygame.Rect(470, 503, 140, 60),
+            pygame.Rect(668, 186, 104, 70),
+            pygame.Rect(700, 256, 55, 45),
+            pygame.Rect(900, 166, 200, 62),
+            pygame.Rect(960, 228, 90, 45),
+            pygame.Rect(783, 368, 68, 42),
+            pygame.Rect(898, 386, 52, 26),
+            pygame.Rect(1082, 340, 66, 24),
+        ]
+
     def mover(self, direcao_frente, player, tutorial):
         """Gerencia o movimento horizontal do player e rolagem do cenário na tela inicial."""
         if direcao_frente:  # Andando para a direita (D)
-            if tutorial.passo_atual < 4:
+            # O tutorial não trava mais o avanço: o cenário rola em qualquer passo
+            if self.distancia_percorrida >= self.limite_maximo_distancia:
+                if player.x < self.largura - player.largura - 50:
+                    player.x += player.velocidade
+            else:
                 if player.x >= 900:
+                    self.mover_cenario_lateral(velocidade=player.velocidade, para_frente=True)
                     player.x = 900
                 else:
                     player.x += player.velocidade
-            else:
-                if self.distancia_percorrida >= self.limite_maximo_distancia:
-                    if player.x < self.largura - player.largura - 50:
-                        player.x += player.velocidade
-                else:
-                    if player.x >= 900:
-                        self.mover_cenario_lateral(velocidade=player.velocidade, para_frente=True)
-                        player.x = 900
-                    else:
-                        player.x += player.velocidade
         else:  # Andando para a esquerda (A)
             if player.x <= 300 and self.distancia_percorrida > 0:
                 self.mover_cenario_lateral(velocidade=player.velocidade, para_frente=False)

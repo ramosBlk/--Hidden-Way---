@@ -45,6 +45,11 @@ class Tutorial:
         if self.concluido:
             return
 
+        # Tutorial opcional: chegar na árvore conclui o tutorial em qualquer passo
+        if cenario.distancia_percorrida >= cenario.limite_maximo_distancia:
+            self.concluido = True
+            return
+
         # Efeito de máquina de escrever
         tempo_atual = pygame.time.get_ticks()
         if self.indice_letra < len(self.texto_completo):
@@ -97,7 +102,7 @@ class Tutorial:
                 self.concluido = True
 
     def desenhar(self, janela):
-        if self.concluido and self.passo_atual == 4:
+        if self.concluido:
             return
 
         # Posição Y mais abaixo no topo da tela, centralizada horizontalmente
