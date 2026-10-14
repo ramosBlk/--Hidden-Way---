@@ -5,7 +5,7 @@
 O jogo foi inspirado em clássicos como **Fireboy and Watergirl (Fogo e Água)**, porém adaptado para uma experiência **single-player**, onde todos os desafios podem ser resolvidos utilizando apenas um personagem. 
 ---
 
-## 📖 Sobre o jogo
+## 📖 Sobre o jogo:
 
 Em **Hidden Way**, o jogador deverá explorar diferentes fases, atravessar plataformas, evitar armadilhas e resolver desafios para encontrar o caminho até a saída de cada nível.
 
