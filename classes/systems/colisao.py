@@ -1,9 +1,8 @@
 import math
 import pygame
 
-# Deslocamento máximo (em px) por sub-passo de movimento.
-# Menor que a espessura das plataformas (5 px) para o player nunca "pular" por cima delas.
-PASSO_MAXIMO = 4
+# Plataformas podem ter apenas 2 px de espessura, então cada sub-passo deve ser menor.
+PASSO_MAXIMO = 1
 
 class Colisao:
     def __init__(self, largura=1400, altura=760, caminho_mascara=None):
