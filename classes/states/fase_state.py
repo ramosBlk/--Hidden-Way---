@@ -29,6 +29,8 @@ class FaseState(GameState):
     inimigos (pisão derrota) e espinhos matam; cair no buraco também.
     """
 
+    ESPESSURA = 36   # altura (px) das plataformas, usada na colisão e no desenho
+
     def __init__(self, gerenciador, largura, altura, config, indice):
         super().__init__(gerenciador)
         self.largura = largura
@@ -38,7 +40,8 @@ class FaseState(GameState):
 
         x, y_chao = config.spawn
         self.player = Player(x=x, y=y_chao - int(96 * 0.6), escala=0.6)
-        self.plataformas = [pygame.Rect(x, y, w, 14) for x, y, w in config.plataformas]
+        # A colisão tem a mesma espessura da plataforma desenhada (ESPESSURA), sem "fantasmas"
+        self.plataformas = [pygame.Rect(x, y, w, self.ESPESSURA) for x, y, w in config.plataformas]
         self.cenario = Cenario(f"assets/sprites/telas/{config.fundo}.png", largura=largura, altura=altura,
                                eh_plataforma=True, plataformas=self.plataformas, paredes=[])
 
@@ -172,9 +175,9 @@ class FaseState(GameState):
         self.cenario.desenhar(janela)
         cor, topo = self.config.cor_plataforma, self.config.cor_topo
         for p in self.plataformas:
-            pygame.draw.rect(janela, cor, (p.x, p.y, p.w, 36))
+            pygame.draw.rect(janela, cor, (p.x, p.y, p.w, p.h))
             pygame.draw.rect(janela, topo, (p.x, p.y, p.w, 6))
-            pygame.draw.rect(janela, tuple(c // 3 for c in cor), (p.x, p.y, p.w, 36), 3)
+            pygame.draw.rect(janela, tuple(c // 3 for c in cor), (p.x, p.y, p.w, p.h), 3)
         for esp in self.espinhos:
             for x in range(esp.x, esp.right, 45):
                 janela.blit(self.sprite_espinho, (x, esp.y), (0, 0, min(51, esp.right - x + 6), 24))

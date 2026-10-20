@@ -28,26 +28,26 @@ class Cenario:
 
         # Lista de plataformas do Mapa 1 (caso eh_plataforma seja True)
         self.plataformas = plataformas if plataformas is not None else [
-            pygame.Rect(126, 725, 848, 5),
-            pygame.Rect(-8, 620, 162, 5),
-            pygame.Rect(400, 448, 267, 9),
+            pygame.Rect(126, 725, 866, 5),
+            pygame.Rect(-8, 620, 218, 5),
+            pygame.Rect(376, 448, 336, 9),
             pygame.Rect(261, 537, 138, 5),
             pygame.Rect(234, 347, 36, 5),
             pygame.Rect(-31, 179, 256, 5),
-            pygame.Rect(-41, 449, 258, 5),
+            pygame.Rect(-41, 449, 281, 5),
             pygame.Rect(335, 313, 57, 5),
             pygame.Rect(680, 329, 50, 5),
             pygame.Rect(508, 248, 44, 5),
             pygame.Rect(799, 362, 42, 5),
-            pygame.Rect(642, 180, 257, 5),
+            pygame.Rect(618, 180, 282, 5),
             pygame.Rect(587, 213, 26, 5),
-            pygame.Rect(924, 160, 170, 5),
-            pygame.Rect(1208, 233, 218, 5),
+            pygame.Rect(902, 160, 196, 5),
+            pygame.Rect(1188, 233, 238, 5),
             pygame.Rect(1089, 332, 62, 7),
             pygame.Rect(912, 381, 29, 5),
-            pygame.Rect(1061, 633, 52, 5),
+            pygame.Rect(1044, 631, 90, 5),
             pygame.Rect(1184, 560, 308, 5),
-            pygame.Rect(1258, 435, 172, 5),
+            pygame.Rect(1238, 435, 192, 5),
         ]
 
         # Paredes e obstáculos sólidos do Mapa 1 (penhascos e corpos de rocha das ilhas).
