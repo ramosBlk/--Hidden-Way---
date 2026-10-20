@@ -40,10 +40,13 @@ class FaseState(GameState):
 
         x, y_chao = config.spawn
         self.player = Player(x=x, y=y_chao - int(96 * 0.6), escala=0.6)
-        # A colisão tem a mesma espessura da plataforma desenhada (ESPESSURA), sem "fantasmas"
-        self.plataformas = [pygame.Rect(x, y, w, self.ESPESSURA) for x, y, w in config.plataformas]
+        # Altura opcional (4º valor); sem ela, a colisão tem a espessura da plataforma desenhada
+        self.plataformas = [pygame.Rect(p[0], p[1], p[2], p[3] if len(p) > 3 else self.ESPESSURA)
+                            for p in config.plataformas]
+        self.paredes = [pygame.Rect(x, y, largura, altura)
+                        for x, y, largura, altura in config.paredes]
         self.cenario = Cenario(f"assets/sprites/telas/{config.fundo}.png", largura=largura, altura=altura,
-                               eh_plataforma=True, plataformas=self.plataformas, paredes=[])
+                       eh_plataforma=True, plataformas=self.plataformas, paredes=self.paredes)
 
         self.particulas = SistemaParticulas()
         self.hud = Hud(largura, altura)
@@ -96,7 +99,8 @@ class FaseState(GameState):
                 motivo=self.motivo_morte))
 
     def _atualizar_jogando(self):
-        self.player.atualizar_movimento(gravidade_ativada=True, plataformas=self.plataformas, paredes=[])
+        self.player.atualizar_movimento(gravidade_ativada=True, plataformas=self.plataformas,
+                        paredes=self.paredes)
         hitbox = self.player.hitbox()
 
         # chaves
@@ -174,10 +178,11 @@ class FaseState(GameState):
     def desenhar(self, janela):
         self.cenario.desenhar(janela)
         cor, topo = self.config.cor_plataforma, self.config.cor_topo
-        for p in self.plataformas:
-            pygame.draw.rect(janela, cor, (p.x, p.y, p.w, p.h))
-            pygame.draw.rect(janela, topo, (p.x, p.y, p.w, 6))
-            pygame.draw.rect(janela, tuple(c // 3 for c in cor), (p.x, p.y, p.w, p.h), 3)
+        if self.config.mostrar_plataformas:
+            for p in self.plataformas:
+                pygame.draw.rect(janela, cor, (p.x, p.y, p.w, p.h))
+                pygame.draw.rect(janela, topo, (p.x, p.y, p.w, min(6, p.h)))
+                pygame.draw.rect(janela, tuple(c // 3 for c in cor), (p.x, p.y, p.w, p.h), 3)
         for esp in self.espinhos:
             for x in range(esp.x, esp.right, 45):
                 janela.blit(self.sprite_espinho, (x, esp.y), (0, 0, min(51, esp.right - x + 6), 24))

@@ -6,7 +6,7 @@ FaseState genérico: coletar TODAS as chaves libera a porta; inimigos e espinhos
 dificuldade de fase em fase.
 
 Convenções (px, tela de 1400x760):
-  plataformas: (x, y_topo, largura)        chaves: (x, y) centro
+    plataformas: (x, y_topo, largura[, altura])  chaves: (x, y) centro
   inimigos:    ("slime", x_min, x_max, y_chão)   |   ("morcego", x_min, x_max, y_base_voo)
   espinhos:    (x, y_topo_da_plataforma, largura)
   porta:       (x_centro, y_chão)          spawn: (x, y_chão)
@@ -26,6 +26,8 @@ class ConfigFase:
     chaves: list
     inimigos: list = field(default_factory=list)
     espinhos: list = field(default_factory=list)
+    paredes: list = field(default_factory=list)
+    mostrar_plataformas: bool = True
 
 
 FASES = [
@@ -35,11 +37,45 @@ FASES = [
     ConfigFase(
         nome="FASE 2 - A CAVERNA", fundo="Mapa_2",
         cor_plataforma=(74, 70, 98), cor_topo=(120, 116, 150),
-        spawn=(60, 660), porta=(1330, 660),
-        plataformas=[(0, 660, 380), (480, 660, 240), (820, 660, 580),
-                     (160, 540, 140), (400, 500, 130), (620, 480, 150), (860, 520, 150)],
-        chaves=[(465, 470), (935, 490)],
-        inimigos=[("slime", 920, 1240, 660)],
+        spawn=(1202, 212), porta=(0, 262),
+        plataformas=[
+            (0, 478, 218, 7),
+            (0, 262, 176, 7),
+            (200, 280, 72, 6),
+            (280, 318, 198, 6),
+            (272, 494, 38, 6),
+            (340, 476, 20, 5),
+            (372, 460, 152, 2),
+            (558, 278, 122, 2),
+            (514, 394, 104, 6),
+            (626, 396, 36, 5),
+            (706, 430, 112, 4),
+            (356, 178, 88, 3),
+            (672, 258, 94, 5),
+            (786, 198, 24, 4),
+            (806, 530, 46, 6),
+            (874, 554, 90, 4),
+            (964, 470, 82, 6),
+            (1148, 528, 122, 5),
+            (1028, 514, 40, 5),
+            (1194, 644, 156, 4),
+            (970, 120, 174, 4),
+            (1202, 212, 160, 4),
+            (1118, 348, 52, 5),
+            (1218, 428, 134, 5),
+            (138, 604, 216, 5),
+            (840, 340, 34, 4),
+            (892, 352, 28, 5),
+            (818, 186, 72, 3),
+            (924, 334, 96, 3),
+            (892, 146, 68, 4),
+            (1068, 518, 24, 6),
+            (1092, 522, 14, 5),
+            (1106, 526, 42, 6),
+        ],
+        chaves=[(1296, 410), (234, 582)],
+        inimigos=[("slime", 280, 446, 320)],
+        mostrar_plataformas=False,
     ),
 
     # ---- Fase 3: 3 chaves, 2 inimigos (um voador)

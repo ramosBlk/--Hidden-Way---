@@ -13,6 +13,7 @@ class InicioState(GameState):
         self.altura = altura
 
         self.player = Player(x=100, y=570, escala=1.0)
+        self.player.forca_pulo = -11  # pulo menor na tela inicial - as demais telas estão com pulo -13.5
         self.tutorial = Tutorial(largura=self.largura, altura=self.altura)
         self.cenario = Cenario(
             caminho_imagem="assets/sprites/telas/Tela_inicio.png",
