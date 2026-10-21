@@ -29,6 +29,8 @@ class FaseState(GameState):
     inimigos (pisão derrota) e espinhos matam; cair no buraco também.
     """
 
+    ESPESSURA = 36   # altura (px) das plataformas, usada na colisão e no desenho
+
     def __init__(self, gerenciador, largura, altura, config, indice):
         super().__init__(gerenciador)
         self.largura = largura
@@ -38,10 +40,11 @@ class FaseState(GameState):
 
         x, y_chao = config.spawn
         self.player = Player(x=x, y=y_chao - int(96 * 0.6), escala=0.6)
-        self.plataformas = [pygame.Rect(p[0], p[1], p[2], p[3] if len(p) > 3 else 14)
-                    for p in config.plataformas]
+        # Altura opcional (4º valor); sem ela, a colisão tem a espessura da plataforma desenhada
+        self.plataformas = [pygame.Rect(p[0], p[1], p[2], p[3] if len(p) > 3 else self.ESPESSURA)
+                            for p in config.plataformas]
         self.paredes = [pygame.Rect(x, y, largura, altura)
-                for x, y, largura, altura in config.paredes]
+                        for x, y, largura, altura in config.paredes]
         self.cenario = Cenario(f"assets/sprites/telas/{config.fundo}.png", largura=largura, altura=altura,
                        eh_plataforma=True, plataformas=self.plataformas, paredes=self.paredes)
 
@@ -177,9 +180,9 @@ class FaseState(GameState):
         cor, topo = self.config.cor_plataforma, self.config.cor_topo
         if self.config.mostrar_plataformas:
             for p in self.plataformas:
-                pygame.draw.rect(janela, cor, (p.x, p.y, p.w, 36))
-                pygame.draw.rect(janela, topo, (p.x, p.y, p.w, 6))
-                pygame.draw.rect(janela, tuple(c // 3 for c in cor), (p.x, p.y, p.w, 36), 3)
+                pygame.draw.rect(janela, cor, (p.x, p.y, p.w, p.h))
+                pygame.draw.rect(janela, topo, (p.x, p.y, p.w, min(6, p.h)))
+                pygame.draw.rect(janela, tuple(c // 3 for c in cor), (p.x, p.y, p.w, p.h), 3)
         for esp in self.espinhos:
             for x in range(esp.x, esp.right, 45):
                 janela.blit(self.sprite_espinho, (x, esp.y), (0, 0, min(51, esp.right - x + 6), 24))

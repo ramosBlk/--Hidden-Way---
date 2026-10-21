@@ -75,6 +75,12 @@ FASES = [
         ],
         chaves=[(1296, 410), (234, 582)],
         inimigos=[("slime", 280, 446, 320)],
+        # Corpos de rocha dos penhascos laterais (começam logo abaixo das bordas das plataformas)
+        paredes=[
+            (0, 270, 125, 148), (0, 485, 135, 275), (138, 612, 215, 148),
+            (1215, 220, 185, 150), (1355, 375, 45, 385),
+            (1194, 540, 81, 45), (1194, 652, 161, 108),
+        ],
         mostrar_plataformas=False,
     ),
 
