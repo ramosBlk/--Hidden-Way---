@@ -37,6 +37,7 @@ class FaseState(GameState):
         self.altura = altura
         self.config = config
         self.indice = indice
+        self.mostrar_debug_paredes = False
 
         x, y_chao = config.spawn
         self.player = Player(x=x, y=y_chao - int(96 * 0.6), escala=0.6)
@@ -67,6 +68,11 @@ class FaseState(GameState):
         self.hud.avisar(config.nome, duracao=3.0)
 
     # ------------------------------------------------------------------ lógica
+    def tratar_eventos(self, eventos):
+        for evento in eventos:
+            if evento.type == pygame.KEYDOWN and evento.key == pygame.K_F3:
+                self.mostrar_debug_paredes = not self.mostrar_debug_paredes
+
     def _mudar_estado(self, novo):
         self.estado = novo
         self.tempo_estado = 0.0
@@ -177,6 +183,10 @@ class FaseState(GameState):
     # ------------------------------------------------------------------ desenho
     def desenhar(self, janela):
         self.cenario.desenhar(janela)
+        if self.mostrar_debug_paredes:
+            for parede in self.paredes:
+                pygame.draw.rect(janela, (255, 0, 0), parede, 2)
+
         cor, topo = self.config.cor_plataforma, self.config.cor_topo
         if self.config.mostrar_plataformas:
             for p in self.plataformas:
