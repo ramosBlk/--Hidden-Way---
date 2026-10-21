@@ -24,7 +24,7 @@ class Player:
         self.vel_x = 0
         self.vel_y = 0
         self.gravidade = 0.6
-        self.forca_pulo = -13.5
+        self.forca_pulo = -13.5 
         self.no_chao = False
 
         # Animação

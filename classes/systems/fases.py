@@ -1,5 +1,5 @@
 """
-Definição (dados) das fases 2 a 5 e fábrica de fases.
+Definição (dados) das fases 2 e 3 e fábrica de fases.
 
 A fase 1 (Mapa 1: chave -> baú -> caverna) tem estado próprio (Mapa1State). As demais usam o
 FaseState genérico: coletar TODAS as chaves libera a porta; inimigos e espinhos aumentam a
@@ -62,7 +62,7 @@ FASES = [
             (970, 120, 174, 4),
             (1202, 212, 160, 4),
             (1118, 348, 52, 5),
-            (1218, 428, 134, 5),
+            (1222, 428, 134, 5),
             (138, 604, 216, 5),
             (840, 340, 34, 4),
             (892, 352, 28, 5),
@@ -77,9 +77,12 @@ FASES = [
         inimigos=[("slime", 280, 446, 320)],
         # Corpos de rocha dos penhascos laterais (começam logo abaixo das bordas das plataformas)
         paredes=[
-            (0, 270, 125, 148), (0, 485, 135, 275), (138, 612, 215, 148),
-            (1215, 220, 185, 150), (1355, 375, 45, 385),
-            (1194, 540, 81, 45), (1194, 652, 161, 108),
+                    (-128, 264, 161, 219),
+            (0, 485, 135, 275),
+            (138, 612, 215, 148),
+            (1355, 217, 67, 545),
+            (1194, 540, 81, 45),
+            (1194, 652, 161, 108),
         ],
         mostrar_plataformas=False,
     ),
@@ -96,35 +99,6 @@ FASES = [
         inimigos=[("slime", 1040, 1260, 660), ("morcego", 450, 900, 480)],
     ),
 
-    # ---- Fase 4: 3 chaves, 3 inimigos, espinhos
-    ConfigFase(
-        nome="FASE 4 - AS CAVERNAS GELADAS", fundo="Mapa_4",
-        cor_plataforma=(70, 100, 140), cor_topo=(190, 225, 250),
-        spawn=(60, 660), porta=(1340, 660),
-        plataformas=[(0, 660, 300), (400, 660, 300), (800, 660, 200), (1100, 660, 300),
-                     (200, 540, 140), (480, 540, 130), (740, 540, 130), (1000, 540, 130), (1260, 540, 140),
-                     (330, 420, 130), (600, 420, 130), (860, 420, 130), (1120, 420, 130),
-                     (480, 300, 160), (740, 300, 160), (1000, 300, 160)],
-        chaves=[(560, 270), (930, 390), (1080, 270)],
-        inimigos=[("slime", 1130, 1270, 660), ("morcego", 450, 900, 470), ("morcego", 800, 1300, 360)],
-        espinhos=[(520, 660, 90), (880, 660, 60)],
-    ),
-
-    # ---- Fase 5: 4 chaves, 4 inimigos, muitos espinhos
-    ConfigFase(
-        nome="FASE 5 - O CORAÇÃO DO VULCÃO", fundo="Mapa_5",
-        cor_plataforma=(96, 44, 36), cor_topo=(230, 120, 50),
-        spawn=(60, 660), porta=(1350, 660),
-        plataformas=[(0, 660, 260), (360, 660, 200), (660, 660, 200), (960, 660, 440),
-                     (140, 550, 130), (400, 540, 120), (640, 540, 130), (900, 540, 120), (1160, 540, 140),
-                     (280, 430, 120), (520, 420, 120), (780, 420, 120), (1040, 420, 120), (1280, 420, 120),
-                     (400, 300, 140), (660, 300, 130), (920, 300, 130), (1180, 300, 140),
-                     (540, 180, 140), (800, 180, 140), (1060, 180, 140)],
-        chaves=[(610, 150), (1130, 150), (205, 520), (1250, 270)],
-        inimigos=[("slime", 1190, 1290, 660), ("morcego", 300, 700, 380),
-                  ("morcego", 700, 1200, 250), ("morcego", 400, 1000, 480)],
-        espinhos=[(420, 660, 80), (730, 660, 70), (1100, 660, 80), (400, 540, 120)],
-    ),
 ]
 
 TOTAL_FASES = len(FASES)
