@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pygame
 
 pygame.init()
@@ -8,7 +10,14 @@ ALTURA = 760
 tela = pygame.display.set_mode((LARGURA, ALTURA))
 pygame.display.set_caption("Editor de Plataformas (com Altura)")
 
-cenario = pygame.image.load("assets/sprites/telas/Mapa_2.png").convert()
+caminho_cenario = (
+    Path(__file__).resolve().parent.parent
+    / "assets"
+    / "sprites"
+    / "telas"
+    / "Mapa_2.png"
+)
+cenario = pygame.image.load(str(caminho_cenario)).convert()
 cenario = pygame.transform.scale(cenario, (LARGURA, ALTURA))
 
 clock = pygame.time.Clock()

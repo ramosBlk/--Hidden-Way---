@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pygame
 
 from classes.systems.fases import FASES
@@ -96,7 +98,14 @@ def main():
     tela = pygame.display.set_mode((LARGURA, ALTURA))
     pygame.display.set_caption("Editor de Paredes - Cenário 2")
 
-    cenario = pygame.image.load("assets/sprites/telas/Mapa_2.png").convert()
+    caminho_cenario = (
+        Path(__file__).resolve().parent.parent
+        / "assets"
+        / "sprites"
+        / "telas"
+        / "Mapa_2.png"
+    )
+    cenario = pygame.image.load(str(caminho_cenario)).convert()
     cenario = pygame.transform.scale(cenario, (LARGURA, ALTURA))
 
     editor = EditorParedes()
