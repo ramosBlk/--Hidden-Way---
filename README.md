@@ -1,15 +1,26 @@
-# 🎮 Hidden Way
+<p align="center">
+  <img src="assets/sprites/telas/Mapa_3.png" alt="Portal no cenário da Floresta Sombria" width="100%">
+</p>
 
-**Hidden Way** é um jogo 2D de plataforma e aventura desenvolvido como projeto da disciplina **Programação para Jogos**, do curso de Ciência da Computação da UNIPAC.
+<h1 align="center">HIDDEN WAY</h1>
 
-O jogo foi inspirado em clássicos como **Fireboy and Watergirl (Fogo e Água)**, porém adaptado para uma experiência **single-player**, onde todos os desafios podem ser resolvidos utilizando apenas um personagem. 
+<p align="center">
+  Uma aventura 2D de plataforma, exploração e mistério.
+</p>
+
+<p align="center">
+  <a href="#como-executar"><img src="https://img.shields.io/badge/JOGAR-AGORA-2ea44f?style=for-the-badge" alt="Jogar agora"></a>
+  <a href="#fases"><img src="https://img.shields.io/badge/EXPLORAR-AS_FASES-5865f2?style=for-the-badge" alt="Explorar fases"></a>
+  <a href="#testar-fases-e-editar-o-mapa"><img src="https://img.shields.io/badge/TESTAR-FASES-8b5cf6?style=for-the-badge" alt="Testar fases"></a>
+</p>
+
 ---
 
-## 📖 Sobre o jogo:
+## 📖 Sobre o jogo
 
 Em **Hidden Way**, o jogador deverá explorar diferentes fases, atravessar plataformas, evitar armadilhas e resolver desafios para encontrar o caminho até a saída de cada nível.
 
-A dificuldade aumenta gradualmente conforme novas mecânicas e obstáculos são introduzidos, incentivando a exploração e o raciocínio do jogador.
+É uma experiência **single-player**: use movimento, saltos e exploração para superar os desafios e encontrar a saída.
 
 ---
 
@@ -28,6 +39,43 @@ Explore os cenários, pule entre plataformas, colete as chaves e alcance a saíd
 1. **Mapa 1:** tutorial, chave, baú e saída pela caverna.
 2. **A Caverna:** colete as chaves, evite os perigos e encontre a saída.
 3. **A Floresta Sombria:** atravesse as plataformas, enfrente inimigos e alcance o portal final.
+
+## 🗺️ Galeria
+
+<table>
+  <tr>
+    <td align="center"><strong>Mapa 1</strong></td>
+    <td align="center"><strong>Fase 2 · A Caverna</strong></td>
+    <td align="center"><strong>Fase 3 · Floresta Sombria</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/sprites/telas/Mapa_1.png" alt="Cenário do Mapa 1" width="320"></td>
+    <td><img src="assets/sprites/telas/Mapa_2.png" alt="Cenário da Caverna" width="320"></td>
+    <td><img src="assets/sprites/telas/Mapa_3.png" alt="Cenário da Floresta Sombria e portal" width="320"></td>
+  </tr>
+</table>
+
+<p align="center">
+  <strong>Personagem</strong>
+  &nbsp;&nbsp;
+  <img src="assets/sprites/personagem_principal/rotations/south.png" alt="Personagem principal" width="48">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <strong>Slime</strong>
+  &nbsp;&nbsp;
+  <img src="assets/sprites/inimigos/slime_0.png" alt="Inimigo slime" width="72">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <strong>Morcego</strong>
+  &nbsp;&nbsp;
+  <img src="assets/sprites/inimigos/morcego_0.png" alt="Inimigo morcego" width="72">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <strong>Chave</strong>
+  &nbsp;&nbsp;
+  <img src="assets/sprites/itens/chave.png" alt="Chave coletável" width="48">
+</p>
+
+<p align="center">
+  <a href="clip/Video_Demonstração.mp4">▶ Assistir vídeo de demonstração</a>
+</p>
 
 ---
 
