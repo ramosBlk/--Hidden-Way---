@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="#como-executar"><img src="https://img.shields.io/badge/JOGAR-AGORA-2ea44f?style=for-the-badge" alt="Jogar agora"></a>
+  <a href="https://ramosblk.github.io/--Hidden-Way---/"><img src="https://img.shields.io/badge/JOGAR-AGORA-2ea44f?style=for-the-badge" alt="Jogar agora"></a>
   <a href="#fases"><img src="https://img.shields.io/badge/EXPLORAR-AS_FASES-5865f2?style=for-the-badge" alt="Explorar fases"></a>
   <a href="#testar-fases-e-editar-o-mapa"><img src="https://img.shields.io/badge/TESTAR-FASES-8b5cf6?style=for-the-badge" alt="Testar fases"></a>
 </p>
@@ -137,6 +137,28 @@ pip install pygame-ce
 
 ```bash
 python main.py
+```
+
+
+
+### Testar localmente ou gerar os arquivos web (opcional)
+
+Para pré-visualizar o jogo no próprio computador, instale a versão fixada do Pygbag:
+
+```bash
+pip install --require-hashes -r requirements-web.txt
+```
+
+Depois, inicie o servidor local:
+
+```bash
+pygbag .
+```
+
+Para gerar os arquivos estáticos sem iniciar o servidor:
+
+```bash
+pygbag --build .
 ```
 
 ## 🧪 Testar fases e editar o mapa
