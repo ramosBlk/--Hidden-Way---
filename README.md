@@ -29,10 +29,13 @@ Em **Hidden Way**, o jogador deverá explorar diferentes fases, atravessar plata
 Explore os cenários, pule entre plataformas, colete as chaves e alcance a saída. O jogo inclui:
 
 - Movimentação lateral e pulo
+- Arremesso de pedras para atacar os inimigos
 - Plataformas e obstáculos
 - Coleta de itens e interação com elementos do cenário
-- Inimigos terrestres e voadores
+- Inimigos terrestres e voadores, incluindo slimes vermelhos na fase 2
 - Progressão por três fases
+
+A introdução começa perto da árvore para que o jogador chegue mais rápido à primeira fase.
 
 ### Fases
 
@@ -93,10 +96,16 @@ O grande diferencial do projeto é trazer a proposta de jogos como **Fireboy and
 
 - **A / D** ou **setas esquerda / direita:** mover
 - **Espaço:** pular
+- **F** ou **clique esquerdo:** arremessar uma pedra
 - **W / S** ou **setas cima / baixo:** movimento vertical no menu inicial
 - **E:** interagir com elementos, como o baú
 - **F3:** exibir/ocultar as paredes de colisão nas fases compatíveis
 - **ESC:** voltar ao seletor de fases (quando iniciado pelo teste direto)
+
+### Menu principal
+
+O menu agora tem os botões **JOGAR**, **OPÇÕES**, **CRÉDITOS** e **SAIR**. Navegue com **W / S** ou
+as **setas** e confirme com **Enter**, **Espaço** ou clique do mouse.
 
 ---
 
@@ -139,9 +148,13 @@ pip install pygame-ce
 python main.py
 ```
 
+### Jogar no navegador
 
+O jogo também está publicado no GitHub Pages: **[Jogar Hidden Way](https://ramosblk.github.io/--Hidden-Way---/)**.
+Não é necessário iniciar um servidor local. As novas versões são publicadas automaticamente quando
+há alterações na branch `homologaçãoblk`.
 
-### Testar localmente ou gerar os arquivos web (opcional)
+### Pré-visualizar localmente ou gerar os arquivos web (opcional)
 
 Para pré-visualizar o jogo no próprio computador, instale a versão fixada do Pygbag:
 
