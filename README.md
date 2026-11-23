@@ -13,34 +13,21 @@ A dificuldade aumenta gradualmente conforme novas mecânicas e obstáculos são 
 
 ---
 
-## 🎯 Objetivo
+## 🎯 Objetivo e mecânicas
 
-O objetivo principal é concluir todas as fases, utilizando:
+Explore os cenários, pule entre plataformas, colete as chaves e alcance a saída. O jogo inclui:
 
-- 🏃 Movimentação
-- 🦘 Pulo
-- 🧩 Resolução de desafios
-- 🔍 Exploração do cenário
-- ⚠️ Desvio de obstáculos e armadilhas
+- Movimentação lateral e pulo
+- Plataformas e obstáculos
+- Coleta de itens e interação com elementos do cenário
+- Inimigos terrestres e voadores
+- Progressão por três fases
 
-Cada fase apresenta novos desafios que exigem atenção e estratégia para alcançar a saída. 
+### Fases
 
----
-
-## ⚙️ Mecânicas
-
-O jogo possui as seguintes mecânicas:
-
-- Movimentação lateral
-- Pulo
-- Plataformas
-- Obstáculos
-- Armadilhas
-- Interação com elementos do cenário
-- Progressão por fases
-- Dificuldade progressiva
-
-As mecânicas ainda estão sendo implementadas 
+1. **Mapa 1:** tutorial, chave, baú e saída pela caverna.
+2. **A Caverna:** colete as chaves, evite os perigos e encontre a saída.
+3. **A Floresta Sombria:** atravesse as plataformas, enfrente inimigos e alcance o portal final.
 
 ---
 
@@ -52,9 +39,18 @@ O grande diferencial do projeto é trazer a proposta de jogos como **Fireboy and
 ## 🛠️ Tecnologias
 
 - Python
-- Pygame
+- Pygame-CE
 - Git
 - GitHub
+
+## 🎮 Controles
+
+- **A / D** ou **setas esquerda / direita:** mover
+- **Espaço:** pular
+- **W / S** ou **setas cima / baixo:** movimento vertical no menu inicial
+- **E:** interagir com elementos, como o baú
+- **F3:** exibir/ocultar as paredes de colisão nas fases compatíveis
+- **ESC:** voltar ao seletor de fases (quando iniciado pelo teste direto)
 
 ---
 
@@ -62,12 +58,11 @@ O grande diferencial do projeto é trazer a proposta de jogos como **Fireboy and
 
 ```
 Hidden Way/
-│
-├── assets/          # Imagens, sprites
-├── classes/         #  player ... funções do jogo
-├── main.py          # Arquivo principal
-├── README.md
-└── .gitignore
+├── assets/          # Cenários, sprites, efeitos e itens
+├── classes/         # Estados, entidades e sistemas do jogo
+├── teste/           # Seletor de fases e editores de plataformas/paredes
+├── main.py          # Inicialização normal do jogo
+└── README.md
 ```
 
 ---
@@ -86,18 +81,44 @@ git clone https://github.com/ramosBlk/--Hidden-Way---.git
 cd --Hidden-Way---
 ```
 
-3. Instale as dependências
+3. Instale a dependência
 
 ```bash
-pip install pygame
 pip install pygame-ce
 ```
 
-4. Execute o jogo
+4. Inicie o jogo pelo menu
 
 ```bash
 python main.py
 ```
+
+## 🧪 Testar fases e editar o mapa
+
+Os arquivos em `teste/` são ferramentas gráficas independentes do menu principal.
+
+### Abrir uma fase diretamente
+
+```bash
+python teste/test_fases.py
+```
+
+Pressione **1**, **2** ou **3** para iniciar a fase desejada sem percorrer as anteriores. Durante a fase, **ESC** retorna ao seletor; no seletor, **ESC** fecha a ferramenta.
+
+### Editores de plataformas e paredes
+
+Execute o editor correspondente:
+
+```bash
+python teste/test_plataforma_fase2.py
+python teste/test_paredes_fase2.py
+python teste/test_plataforma_fase3.py
+python teste/test_paredes_fase3.py
+```
+
+Nos editores, use **TAB** para trocar de elemento, **N** para adicionar, **DELETE** para excluir, as **setas** para mover, **Q/E** para ajustar a largura e **A/D** para ajustar a altura. **ENTER** imprime as coordenadas no terminal.
+
+Os editores não salvam as coordenadas automaticamente. Depois de exportá-las, copie a lista impressa para a configuração correspondente em `classes/systems/fases.py`.
 
 ---
 
