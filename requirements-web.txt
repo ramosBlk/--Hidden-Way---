@@ -1,0 +1,2 @@
+pygbag==0.9.3 \
+    --hash=sha256:ada203ff5a214f721029cb3b3741f641b032cde1ccaac60bc8dd9e641f3da3d5

@@ -1,3 +1,5 @@
+import asyncio
+
 import pygame
 from classes.systems.game_manager import GameManager
 from classes.states.menu_state import MenuState
@@ -14,31 +16,25 @@ sobreposicao_brilho = pygame.Surface((LARGURA, ALTURA))
 sobreposicao_brilho.fill((0, 0, 0))
 brilho_aplicado = None
 
-# Inicializa o Gerenciador de Estados
-gerenciador = GameManager()
 
 # Define o estado inicial do jogo (menu principal)
 gerenciador.mudar_estado(MenuState(gerenciador, LARGURA, ALTURA))
 
-relogio = pygame.time.Clock()
-rodando = True
-pygame.event.clear()
+        eventos = pygame.event.get()
+        for evento in eventos:
+            if evento.type == pygame.QUIT:
+                rodando = False
 
-while rodando:
-    dt = relogio.tick(60) / 1000.0  # segundos desde o último quadro
+        gerenciador.tratar_eventos(eventos)
+        gerenciador.atualizar(dt)
 
-    # Coleta de eventos globais
-    eventos = pygame.event.get()
-    for evento in eventos:
-        if evento.type == pygame.QUIT:
-            rodando = False
+        janela.fill((0, 0, 0))
+        gerenciador.desenhar(janela)
 
-    # Delega eventos, atualizações e renderizações para o estado atual ativo
-    gerenciador.tratar_eventos(eventos)
-    gerenciador.atualizar(dt)
+        pygame.display.flip()
+        await asyncio.sleep(0)
 
-    janela.fill((0, 0, 0))
-    gerenciador.desenhar(janela)
+    pygame.quit()
 
     if brilho_aplicado != Configuracoes.brilho:
         brilho_aplicado = Configuracoes.brilho
@@ -49,4 +45,5 @@ while rodando:
 
     pygame.display.flip()
 
-pygame.quit()
+if __name__ == "__main__":
+    asyncio.run(main())
