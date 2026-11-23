@@ -38,7 +38,7 @@ Explore os cenários, pule entre plataformas, colete as chaves e alcance a saíd
 
 1. **Mapa 1:** tutorial, chave, baú e saída pela caverna.
 2. **A Caverna:** colete as chaves, evite os perigos e encontre a saída.
-3. **A Floresta Sombria:** atravesse as plataformas, enfrente inimigos e alcance o portal final.
+3. **O Céu:** atravesse as plataformas, enfrente inimigos e alcance o portal final.
 
 ## 🗺️ Galeria
 
@@ -46,7 +46,7 @@ Explore os cenários, pule entre plataformas, colete as chaves e alcance a saíd
   <tr>
     <td align="center"><strong>Mapa 1</strong></td>
     <td align="center"><strong>Fase 2 · A Caverna</strong></td>
-    <td align="center"><strong>Fase 3 · Floresta Sombria</strong></td>
+    <td align="center"><strong>Fase 3 · O Céu </strong></td>
   </tr>
   <tr>
     <td><img src="assets/sprites/telas/Mapa_1.png" alt="Cenário do Mapa 1" width="320"></td>
@@ -58,24 +58,22 @@ Explore os cenários, pule entre plataformas, colete as chaves e alcance a saíd
 <p align="center">
   <strong>Personagem</strong>
   &nbsp;&nbsp;
-  <img src="assets/sprites/personagem_principal/rotations/south.png" alt="Personagem principal" width="48">
+  <img src="assets/sprites/personagem_principal/rotations/south.png" alt="Personagem principal" width="68">
   &nbsp;&nbsp;&nbsp;&nbsp;
   <strong>Slime</strong>
   &nbsp;&nbsp;
-  <img src="assets/sprites/inimigos/slime_0.png" alt="Inimigo slime" width="72">
+  <img src="assets/sprites/inimigos/slime_0.png" alt="Inimigo slime" width="62">
   &nbsp;&nbsp;&nbsp;&nbsp;
   <strong>Morcego</strong>
   &nbsp;&nbsp;
-  <img src="assets/sprites/inimigos/morcego_0.png" alt="Inimigo morcego" width="72">
+  <img src="assets/sprites/inimigos/morcego_0.png" alt="Inimigo morcego" width="62">
   &nbsp;&nbsp;&nbsp;&nbsp;
   <strong>Chave</strong>
   &nbsp;&nbsp;
   <img src="assets/sprites/itens/chave.png" alt="Chave coletável" width="48">
 </p>
 
-<p align="center">
-  <a href="clip/Video_Demonstração.mp4">▶ Assistir vídeo de demonstração</a>
-</p>
+
 
 ---
 
@@ -181,4 +179,4 @@ Os editores não salvam as coordenadas automaticamente. Depois de exportá-las, 
 
 ## 📚 Projeto Acadêmico
 
-___Desenvolvido para a disciplina **Programação para Jogos** do curso de **Ciência da Computação** do Centro Universitário Presidente Antônio Carlos (UNIPAC), sob orientação do professor **Rodrigo Fernandes dos Santos**.
+Desenvolvido para a disciplina **Programação para Jogos** do curso de **Ciência da Computação** do Centro Universitário Presidente Antônio Carlos (UNIPAC), sob orientação do professor **Rodrigo Fernandes dos Santos**.
