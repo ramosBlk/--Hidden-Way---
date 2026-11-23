@@ -6,13 +6,16 @@ from classes.states.game_state import GameState
 
 
 class InicioState(GameState):
+    DISTANCIA_INICIAL_CENARIO = 1200
+    POSICAO_INICIAL_PLAYER = 900
+
     def __init__(self, gerenciador, largura, altura):
         super().__init__(gerenciador)
         self.gerenciador = gerenciador
         self.largura = largura
         self.altura = altura
 
-        self.player = Player(x=100, y=570, escala=1.0)
+        self.player = Player(x=self.POSICAO_INICIAL_PLAYER, y=570, escala=1.0)
         self.player.forca_pulo = -11  # pulo menor na tela inicial - as demais telas estão com pulo -13.5
         self.tutorial = Tutorial(largura=self.largura, altura=self.altura)
         self.cenario = Cenario(
@@ -23,6 +26,11 @@ class InicioState(GameState):
             velocidade=3.5,
             eh_plataforma=False
         )
+        self.cenario.distancia_percorrida = min(
+            self.DISTANCIA_INICIAL_CENARIO, self.cenario.limite_maximo_distancia
+        )
+        self.cenario.x1 = -self.cenario.distancia_percorrida
+        self.cenario.x2 = self.largura - self.cenario.distancia_percorrida
 
     def tratar_eventos(self, eventos):
         for evento in eventos:
