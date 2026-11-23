@@ -152,7 +152,7 @@ python main.py
 
 O jogo também está publicado no GitHub Pages: **[Jogar Hidden Way](https://ramosblk.github.io/--Hidden-Way---/)**.
 Não é necessário iniciar um servidor local. As novas versões são publicadas automaticamente quando
-há alterações na branch `homologaçãoblk`.
+há alterações nas branches `main` ou `homologaçãoblk`.
 
 ### Pré-visualizar localmente ou gerar os arquivos web (opcional)
 

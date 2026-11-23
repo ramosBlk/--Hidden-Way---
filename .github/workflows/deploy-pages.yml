@@ -3,6 +3,7 @@ name: Publicar jogo no GitHub Pages
 on:
   push:
     branches:
+      - main
       - homologaçãoblk
   workflow_dispatch:
 
