@@ -24,20 +24,33 @@ class SpritesPlayer:
                         for d, p in self.CORRIDA.items()}
         self.pulo = {d: self._pasta(os.path.join("jumping", p), self.RECORTES.get(p))
                      for d, p in self.PULO.items()}
-        self.disparo = self._pasta(self.DISPARO)
+        self.disparo = self._pasta(self.DISPARO, normalizar_altura=True)
         self.disparo_esquerda = [pygame.transform.flip(frame, True, False)
                                  for frame in self.disparo]
 
-    def _imagem(self, caminho, recorte=None):
+    def _imagem(self, caminho, recorte=None, normalizar_altura=False):
         try:
             img = pygame.image.load(os.path.join(BASE, caminho)).convert_alpha()
             if recorte:
                 img = img.subsurface((*recorte, REF, REF)).copy()
+            if normalizar_altura:
+                limites = img.get_bounding_rect()
+                if limites.height:
+                    escala = self.tamanho[1] * (60 / REF) / limites.height
+                    ampliada = pygame.transform.scale(
+                        img,
+                        (round(img.get_width() * escala), round(img.get_height() * escala)),
+                    )
+                    normalizada = pygame.Surface(self.tamanho, pygame.SRCALPHA)
+                    destino_x = self.tamanho[0] / 2 - limites.centerx * escala
+                    destino_y = self.tamanho[1] * (62 / REF) - limites.bottom * escala
+                    normalizada.blit(ampliada, (round(destino_x), round(destino_y)))
+                    return normalizada
             return pygame.transform.scale(img, self.tamanho)
         except (pygame.error, FileNotFoundError, ValueError):
             return pygame.Surface(self.tamanho)
 
-    def _pasta(self, caminho, recorte=None):
+    def _pasta(self, caminho, recorte=None, normalizar_altura=False):
         """Carrega todos os PNGs de uma pasta em ordem numérica (frame_000, frame_001...)."""
         pasta = os.path.join(BASE, caminho)
         if not os.path.isdir(pasta):
@@ -46,7 +59,10 @@ class SpritesPlayer:
             (f for f in os.listdir(pasta) if f.lower().endswith(".png")),
             key=lambda nome: int("".join(c for c in nome if c.isdigit()) or 0),
         )
-        return [self._imagem(os.path.join(caminho, f), recorte) for f in arquivos]
+        return [
+            self._imagem(os.path.join(caminho, f), recorte, normalizar_altura)
+            for f in arquivos
+        ]
 
     def idle_de(self, direcao):
         return self.idle.get(direcao, self.idle["direita"])
