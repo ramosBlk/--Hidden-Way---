@@ -12,6 +12,7 @@ class SpritesPlayer:
     IDLE = {"direita": "south-east", "esquerda": "south-west", "cima": "north", "baixo": "south"}
     CORRIDA = {"direita": "run_right", "esquerda": "run_left", "cima": "run_up", "baixo": "run_low"}
     PULO = {"direita": "east", "esquerda": "west", "cima": "north", "baixo": "south"}
+    DISPARO = "shoot"
 
     # Pastas exportadas com canvas maior que 64x64: (x, y) da janela 64x64 recortada
     RECORTES = {"south": (10, 8)}  # jumping/south é 84x84
@@ -23,6 +24,9 @@ class SpritesPlayer:
                         for d, p in self.CORRIDA.items()}
         self.pulo = {d: self._pasta(os.path.join("jumping", p), self.RECORTES.get(p))
                      for d, p in self.PULO.items()}
+        self.disparo = self._pasta(self.DISPARO)
+        self.disparo_esquerda = [pygame.transform.flip(frame, True, False)
+                                 for frame in self.disparo]
 
     def _imagem(self, caminho, recorte=None):
         try:

@@ -3,6 +3,8 @@ import random
 
 import pygame
 
+from classes.systems.configuracoes import Configuracoes
+
 
 class _Particula:
     __slots__ = ("x", "y", "vx", "vy", "vida", "vida_max", "cor", "tam", "gravidade")
@@ -21,6 +23,9 @@ class SistemaParticulas:
 
     def emitir(self, x, y, quantidade, cores, velocidade=(40, 140), vida=(0.4, 0.9), tam=(2, 4),
                gravidade=0.0, angulo=(0, 360), area=(0, 0)):
+        if quantidade <= 0:
+            return
+        quantidade = max(1, round(quantidade * Configuracoes.fator_particulas()))
         for _ in range(quantidade):
             ang = math.radians(random.uniform(*angulo))
             vel = random.uniform(*velocidade)

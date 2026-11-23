@@ -4,6 +4,7 @@ from enum import Enum
 import pygame
 
 from classes.systems.assets import carregar_imagem
+from classes.systems.configuracoes import Configuracoes
 
 
 class EstadoChave(Enum):
@@ -27,6 +28,7 @@ class Chave:
         self.tempo_coleta = 0.0
         self.destino = pygame.Vector2(0, 0)
         self.pos_voo = pygame.Vector2(x, y)
+        self.cores = [(255, 230, 120), (255, 255, 200), (255, 190, 60)]
         self.sprite = carregar_imagem("assets/sprites/itens/chave.png", (39, 21), (255, 214, 74))
         self.brilho = carregar_imagem("assets/sprites/efeitos/brilho.png", (48, 48), (255, 230, 140))
 
@@ -41,8 +43,7 @@ class Chave:
         self.estado = EstadoChave.VOANDO
         self.destino = pygame.Vector2(destino_hud)
         self.tempo_coleta = 0.0
-        self.particulas.emitir(self.centro.x, self.centro.y, 26,
-                               [(255, 230, 120), (255, 255, 200), (255, 190, 60)],
+        self.particulas.emitir(self.centro.x, self.centro.y, 26, self.cores,
                                velocidade=(60, 190), vida=(0.4, 0.9), tam=(2, 5), gravidade=120)
         return True
 
@@ -60,7 +61,7 @@ class Chave:
             k = min(1.0, (t - self.TEMPO_SUBIDA) / self.TEMPO_VOO)
             origem = self.centro + pygame.Vector2(0, -28)
             self.pos_voo = origem.lerp(self.destino, k * k)
-            self.particulas.emitir(self.pos_voo.x, self.pos_voo.y, 2, [(255, 230, 120), (255, 255, 210)],
+            self.particulas.emitir(self.pos_voo.x, self.pos_voo.y, 2, self.cores,
                                    velocidade=(10, 40), vida=(0.2, 0.4), tam=(2, 3))
             if k >= 1.0:
                 self.estado = EstadoChave.COLETADA
@@ -76,7 +77,8 @@ class Chave:
         else:
             pos = self.pos_voo
             escala_halo = 1.4
-        tam_halo = int(48 * escala_halo * 1.3)
-        halo = pygame.transform.scale(self.brilho, (tam_halo, tam_halo))
-        janela.blit(halo, halo.get_rect(center=(int(pos[0]), int(pos[1]))))
+        if Configuracoes.brilhos_ativos():
+            tam_halo = int(48 * escala_halo * 1.3)
+            halo = pygame.transform.scale(self.brilho, (tam_halo, tam_halo))
+            janela.blit(halo, halo.get_rect(center=(int(pos[0]), int(pos[1]))))
         janela.blit(self.sprite, self.sprite.get_rect(center=(int(pos[0]), int(pos[1]))))

@@ -97,3 +97,130 @@ class NavegadorBotoes:
     def desenhar(self, janela, alpha=255):
         for i, b in enumerate(self.botoes):
             b.desenhar(janela, selecionado=(i == self.indice), alpha=alpha)
+
+
+class Slider:
+    """Controle deslizante pixelado, ajustável por mouse ou teclado."""
+
+    def __init__(self, rotulo, centro, valor, minimo=0, maximo=100, passo=5, largura=420):
+        self.rotulo = rotulo
+        self.minimo = minimo
+        self.maximo = maximo
+        self.passo = passo
+        self.largura = largura
+        self.valor = max(minimo, min(maximo, int(valor)))
+        self.arrastando = False
+        self.trilho_rect = pygame.Rect(0, 0, largura, 10)
+        self.trilho_rect.center = centro
+        self.rect = pygame.Rect(0, 0, largura + 360, 56)
+        self.rect.center = centro
+
+    def _definir_valor(self, valor):
+        valor = max(self.minimo, min(self.maximo, int(valor)))
+        if valor == self.valor:
+            return False
+        self.valor = valor
+        return True
+
+    def _definir_posicao(self, x):
+        proporcao = max(0.0, min(1.0, (x - self.trilho_rect.left) / self.trilho_rect.width))
+        valor = round(self.minimo + proporcao * (self.maximo - self.minimo))
+        valor = round((valor - self.minimo) / self.passo) * self.passo + self.minimo
+        return self._definir_valor(valor)
+
+    def tratar_evento(self, evento, selecionado=False):
+        if evento.type == pygame.KEYDOWN and selecionado:
+            if evento.key in (pygame.K_LEFT, pygame.K_a):
+                return self._definir_valor(self.valor - self.passo)
+            if evento.key in (pygame.K_RIGHT, pygame.K_d):
+                return self._definir_valor(self.valor + self.passo)
+        elif evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
+            if self.trilho_rect.inflate(0, 32).collidepoint(evento.pos):
+                self.arrastando = True
+                return self._definir_posicao(evento.pos[0])
+        elif evento.type == pygame.MOUSEMOTION and self.arrastando:
+            return self._definir_posicao(evento.pos[0])
+        elif evento.type == pygame.MOUSEBUTTONUP and evento.button == 1:
+            self.arrastando = False
+        return False
+
+    def desenhar(self, janela, selecionado=False):
+        percentual = ((self.valor - self.minimo) / (self.maximo - self.minimo)
+                      if self.maximo > self.minimo else 0)
+        preenchido = pygame.Rect(self.trilho_rect)
+        preenchido.width = int(self.trilho_rect.width * percentual)
+        pygame.draw.rect(janela, (65, 68, 75), self.trilho_rect)
+        if preenchido.width:
+            pygame.draw.rect(janela, (255, 214, 74), preenchido)
+        pygame.draw.rect(janela, (180, 185, 195), self.trilho_rect, 2)
+
+        marcador = pygame.Rect(0, 0, 20, 20)
+        marcador.center = (self.trilho_rect.left + int(self.trilho_rect.width * percentual),
+                           self.trilho_rect.centery)
+        pygame.draw.rect(janela, (255, 226, 115), marcador)
+        pygame.draw.rect(janela, (65, 56, 35), marcador, 2)
+
+        cor = (255, 214, 74) if selecionado else (225, 225, 230)
+        rotulo = texto_pixel(self.rotulo, 9, cor, escala=2)
+        janela.blit(rotulo, rotulo.get_rect(midright=(self.trilho_rect.left - 24,
+                                                      self.trilho_rect.centery)))
+        texto_valor = texto_pixel(f"{self.valor}%", 9, cor, escala=2)
+        janela.blit(texto_valor, texto_valor.get_rect(midleft=(self.trilho_rect.right + 24,
+                                                               self.trilho_rect.centery)))
+
+
+class SeletorOpcoes:
+    """Seletor horizontal de valores textuais para as opções gráficas."""
+
+    def __init__(self, opcoes, centro, valor, largura=420, rotulo="QUALIDADE DO GRÁFICO"):
+        self.opcoes = tuple(opcoes)
+        self.rotulo = rotulo
+        self.largura = largura
+        self.rect = pygame.Rect(0, 0, largura + 360, 56)
+        self.rect.center = centro
+        self.retos_opcoes = []
+        largura_opcao = largura // len(self.opcoes)
+        for indice in range(len(self.opcoes)):
+            ret = pygame.Rect(centro[0] - largura // 2 + indice * largura_opcao,
+                              centro[1] - 25, largura_opcao, 50)
+            self.retos_opcoes.append(ret)
+        normalizadas = [opcao.lower().replace("é", "e") for opcao in self.opcoes]
+        self.indice = next((i for i, opcao in enumerate(normalizadas)
+                            if opcao == valor.lower().replace("é", "e")), 0)
+
+    @property
+    def valor(self):
+        return self.opcoes[self.indice].lower().replace("é", "e")
+
+    def _selecionar(self, indice):
+        indice = max(0, min(len(self.opcoes) - 1, indice))
+        if indice == self.indice:
+            return False
+        self.indice = indice
+        return True
+
+    def tratar_evento(self, evento, selecionado=False):
+        if evento.type == pygame.KEYDOWN and selecionado:
+            if evento.key in (pygame.K_LEFT, pygame.K_a):
+                return self._selecionar(self.indice - 1)
+            if evento.key in (pygame.K_RIGHT, pygame.K_d):
+                return self._selecionar(self.indice + 1)
+        elif evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
+            for indice, ret in enumerate(self.retos_opcoes):
+                if ret.collidepoint(evento.pos):
+                    return self._selecionar(indice)
+        return False
+
+    def desenhar(self, janela, selecionado=False):
+        cor_rotulo = (255, 214, 74) if selecionado else (225, 225, 230)
+        rotulo = texto_pixel(self.rotulo, 9, cor_rotulo, escala=2)
+        janela.blit(rotulo, rotulo.get_rect(midright=(self.retos_opcoes[0].left - 24,
+                                                      self.retos_opcoes[0].centery)))
+        for indice, (opcao, ret) in enumerate(zip(self.opcoes, self.retos_opcoes)):
+            ativo = indice == self.indice
+            cor = (255, 214, 74) if ativo else (225, 225, 230)
+            texto = texto_pixel(opcao.upper(), 9, cor, escala=2)
+            janela.blit(texto, texto.get_rect(center=ret.center))
+            if indice < len(self.opcoes) - 1:
+                divisor = texto_pixel("|", 9, (155, 160, 170), escala=2)
+                janela.blit(divisor, divisor.get_rect(center=(ret.right, ret.centery)))

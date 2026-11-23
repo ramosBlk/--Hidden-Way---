@@ -6,6 +6,7 @@ import pygame
 
 from classes.systems.assets import carregar_imagem
 from classes.systems.audio import Audio
+from classes.systems.configuracoes import Configuracoes
 
 
 class EstadoBau(Enum):
@@ -25,8 +26,9 @@ class Bau:
     # o sprite cobre o baú que já vem desenhado no Mapa_1.png
     TOPLEFT_SPRITE = (113, 127)
 
-    def __init__(self, particulas):
-        self.rect = pygame.Rect(113, 145, 42, 30)
+    def __init__(self, particulas, posicao=None):
+        self.posicao_sprite = tuple(posicao or self.TOPLEFT_SPRITE)
+        self.rect = pygame.Rect(self.posicao_sprite[0], self.posicao_sprite[1] + 18, 42, 30)
         self.estado = EstadoBau.FECHADO
         self.particulas = particulas
         self.tempo = 0.0
@@ -39,13 +41,13 @@ class Bau:
     def perto(self, hitbox_player):
         return self.rect.inflate(70, 40).colliderect(hitbox_player)
 
-    def tentar_abrir(self, tem_chave):
-        """Retorna "aberto_antes", "sem_chave" ou "abrindo"."""
+    def tentar_abrir(self, tem_amuletos):
+        """Retorna "aberto_antes", "sem_amuletos" ou "abrindo"."""
         if self.estado != EstadoBau.FECHADO:
             return "aberto_antes"
-        if not tem_chave:
+        if not tem_amuletos:
             self.tremor = 0.35
-            return "sem_chave"
+            return "sem_amuletos"
         self.estado = EstadoBau.ABRINDO
         self.tempo = 0.0
         self._frame_anterior = 0
@@ -79,10 +81,11 @@ class Bau:
 
     def desenhar(self, janela):
         deslocamento = int(3 * math.sin(self.tremor * 60)) if self.tremor > 0 else 0
-        x, y = self.TOPLEFT_SPRITE
+        x, y = self.posicao_sprite
         janela.blit(self.frames[self._frame_atual()], (x + deslocamento, y))
 
-        if self.estado == EstadoBau.ABRINDO and self.tempo > self.INICIO_FRAMES[3]:
+        if (Configuracoes.brilhos_ativos() and self.estado == EstadoBau.ABRINDO
+                and self.tempo > self.INICIO_FRAMES[3]):
             # halo + raios de luz subindo do baú durante o brilho final
             k = (self.tempo - self.INICIO_FRAMES[3]) / (self.DURACAO_TOTAL - self.INICIO_FRAMES[3])
             intensidade = math.sin(k * math.pi)

@@ -12,6 +12,5 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Artefatos gerados pelo Pygbag
-build/
-build-cache/
+# Configurações locais do jogo
+config.json

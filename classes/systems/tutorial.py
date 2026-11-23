@@ -7,6 +7,7 @@ CONTROLES = [
     ("A / D  ou  < >", "Andar para os lados"),
     ("W / S  ou  ^ v", "Subir / descer (só no menu)"),
     ("ESPAÇO", "Pular"),
+    ("F / CLIQUE", "Atirar pedra"),
     ("E", "Interagir (baú, árvore)"),
     ("R", "Tentar de novo (Game Over)"),
 ]
@@ -27,10 +28,10 @@ class Tutorial:
         pass  # estático
 
     def _montar_painel(self):
-        painel = pygame.Surface((600, 300), pygame.SRCALPHA)
+        painel = pygame.Surface((600, 400), pygame.SRCALPHA)
         painel.fill((0, 0, 0, 0))
         base = pygame.Surface(painel.get_size(), pygame.SRCALPHA)
-        desenhar_placa(base, pygame.Rect(0, 40, 600, 310), (0, 220, 255), (32, 36, 44))
+        desenhar_placa(base, pygame.Rect(0, 40, 600, 350), (0, 220, 255), (32, 36, 44))
         base.set_alpha(125)
         painel.blit(base, (0, 0))
 

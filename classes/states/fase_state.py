@@ -4,34 +4,38 @@ from enum import Enum
 import pygame
 
 from classes.entities.chave import Chave, EstadoChave
+from classes.entities.amuleto import Amuleto
+from classes.entities.bau import Bau, EstadoBau
 from classes.entities.inimigo import Inimigo
 from classes.entities.player import Player
 from classes.entities.porta import Porta
 from classes.states.game_state import GameState
 from classes.systems.assets import carregar_imagem
 from classes.systems.audio import Audio
+from classes.systems.combate import SistemaCombate
 from classes.systems.cenario import Cenario
 from classes.systems.hud import Hud
 from classes.systems.particulas import SistemaParticulas
 from classes.systems.queda import QuedaNoBuraco, caiu_no_buraco
 from classes.systems.transicao import Fade
+from classes.ui import texto_pixel
 
 
 class EstadoFaseGenerica(Enum):
     JOGANDO = "jogando"
-    ENTRANDO_PORTA = "entrando_porta"   # andar automático até a porta + fade
+    ABRINDO_BAU = "abrindo_bau"
+    ENTRANDO_PORTA = "entrando_porta"   # interação com a porta + fade
     MORRENDO = "morrendo"               # animação de morte -> Game Over
 
 
 class FaseState(GameState):
     """
-    Fase genérica (2 a 3), descrita por uma ConfigFase: coletar TODAS as chaves abre a porta;
-    inimigos (pisão derrota) e espinhos matam; cair no buraco também.
+    Fase genérica (2 a 3): coletar amuletos, abrir o baú e usar a chave para sair.
     """
 
     ESPESSURA = 36   # altura (px) das plataformas, usada na colisão e no desenho
 
-    def __init__(self, gerenciador, largura, altura, config, indice):
+    def __init__(self, gerenciador, largura, altura, config, indice, vidas=3):
         super().__init__(gerenciador)
         self.largura = largura
         self.altura = altura
@@ -40,7 +44,7 @@ class FaseState(GameState):
         self.mostrar_debug_paredes = False
 
         x, y_chao = config.spawn
-        self.player = Player(x=x, y=y_chao - int(96 * 0.6), escala=0.6)
+        self.player = Player(x=x, y=y_chao - int(96 * 0.6), escala=0.6, vidas=vidas)
         self.player.forca_pulo = config.forca_pulo
         # Altura opcional (4º valor); sem ela, a colisão tem a espessura da plataforma desenhada
         self.plataformas = [pygame.Rect(p[0], p[1], p[2], p[3] if len(p) > 3 else self.ESPESSURA)
@@ -52,9 +56,18 @@ class FaseState(GameState):
 
         self.particulas = SistemaParticulas()
         self.hud = Hud(largura, altura)
-        self.chaves = [Chave(cx, cy, self.particulas) for cx, cy in config.chaves]
-        self.chaves_chegaram = 0     # chaves que já "voaram" até a HUD (contador exibido)
+        self.amuletos = [
+            Amuleto(cx, cy, self.particulas, indice)
+            for indice, (cx, cy) in enumerate(config.amuletos)
+        ]
+        self.amuletos_coletados = 0
+        self.amuletos_recolhidos = [False] * len(self.amuletos)
+        self.bau = Bau(self.particulas, config.bau)
+        self.chave = None
+        self.tem_chave = False
         self.inimigos = [Inimigo(t, x0, x1, y, self.particulas) for t, x0, x1, y in config.inimigos]
+        self.combate = SistemaCombate(self.player, self.inimigos, self.particulas)
+        self.hud.configurar_jogador(self.player)
         self.espinhos = [pygame.Rect(x, y - 24, w, 24) for x, y, w in config.espinhos]
         self.porta = Porta(
             *config.porta,
@@ -79,6 +92,36 @@ class FaseState(GameState):
         for evento in eventos:
             if evento.type == pygame.KEYDOWN and evento.key == pygame.K_F3:
                 self.mostrar_debug_paredes = not self.mostrar_debug_paredes
+            elif (evento.type == pygame.KEYDOWN and evento.key == pygame.K_e
+                  and self.estado == EstadoFaseGenerica.JOGANDO):
+                self._interagir()
+            elif (self.estado == EstadoFaseGenerica.JOGANDO
+                  and SistemaCombate.eh_evento_disparo(evento)):
+                self.combate.atirar()
+
+    def _interagir(self):
+        hitbox = self.player.hitbox()
+        if self.bau.estado == EstadoBau.FECHADO and self.bau.perto(hitbox):
+            resultado = self.bau.tentar_abrir(
+                self.amuletos_coletados == len(self.amuletos))
+            if resultado == "sem_amuletos":
+                Audio.tocar("bau_negado")
+                self.hud.avisar_central("Você precisa dos 3 amuletos!", cor=(255, 180, 130))
+            elif resultado == "abrindo":
+                Audio.tocar("bau_abrir")
+                self._mudar_estado(EstadoFaseGenerica.ABRINDO_BAU)
+            return
+
+        if not self.porta.rect.inflate(70, 40).colliderect(hitbox):
+            return
+        if not self.tem_chave:
+            self.hud.avisar_central("Você precisa da chave do baú!", cor=(255, 180, 130))
+        elif not self.porta.liberada:
+            self.porta.liberar()
+            self.hud.avisar_central("Porta desbloqueada!", cor=(170, 255, 190))
+        else:
+            Audio.tocar("entrar")
+            self._mudar_estado(EstadoFaseGenerica.ENTRANDO_PORTA)
 
     def _mudar_estado(self, novo):
         self.estado = novo
@@ -87,19 +130,27 @@ class FaseState(GameState):
     def atualizar(self, dt=1 / 60):
         self.tempo += dt
         self.tempo_estado += dt
+        self.player.atualizar_estado(dt)
         self.particulas.atualizar(dt)
         self.hud.atualizar(dt)
         self.fade_entrada.atualizar(dt)
         self.porta.atualizar(dt)
+        if self.bau.atualizar(dt):
+            self._bau_aberto()
         for inimigo in self.inimigos:
             inimigo.atualizar(dt)
-        for chave in self.chaves:
-            if chave.atualizar(dt):
-                self.chaves_chegaram += 1
-                self.hud.chave_recebida()
-                Audio.tocar("chave_hud")
+        for amuleto in self.amuletos:
+            amuleto.atualizar(dt)
+        if self.chave and self.chave.atualizar(dt):
+            self.tem_chave = True
+            self.hud.chave_recebida()
+            self.hud.avisar_central("Chave Coletada")
+            Audio.tocar("chave_hud")
 
-        if self.estado == EstadoFaseGenerica.JOGANDO:
+        if self.estado == EstadoFaseGenerica.ABRINDO_BAU:
+            self.player.animar(False)
+        elif self.estado == EstadoFaseGenerica.JOGANDO:
+            self.combate.atualizar(dt)
             self._atualizar_jogando()
         elif self.estado == EstadoFaseGenerica.ENTRANDO_PORTA:
             self._atualizar_entrando(dt)
@@ -111,33 +162,35 @@ class FaseState(GameState):
                 reiniciar=lambda: criar_fase(self.indice, self.gerenciador, self.largura, self.altura),
                 motivo=self.motivo_morte))
 
+    def _bau_aberto(self):
+        self.chave = Chave(*self.bau.rect.center, self.particulas)
+        self.chave.coletar(Hud.POS_CHAVE)
+        self._mudar_estado(EstadoFaseGenerica.JOGANDO)
+
     def _atualizar_jogando(self):
         self.player.atualizar_movimento(gravidade_ativada=True, plataformas=self.plataformas,
                         paredes=self.paredes)
         hitbox = self.player.hitbox()
 
-        # chaves
-        for chave in self.chaves:
-            if chave.estado == EstadoChave.NO_MAPA and hitbox.colliderect(chave.hitbox):
-                chave.coletar(Hud.POS_CHAVE)
+        # Amuletos
+        for indice, amuleto in enumerate(self.amuletos):
+            if amuleto.estado == EstadoChave.NO_MAPA and hitbox.colliderect(amuleto.hitbox):
+                amuleto.coletar(Hud.POS_AMULETOS[indice])
+                self.amuletos_recolhidos[indice] = True
+                self.amuletos_coletados += 1
+                self.hud.avisar_central(
+                    f"Amuleto Coletado {self.amuletos_coletados}/{len(self.amuletos)}")
                 Audio.tocar("chave")
-                coletadas = sum(c.estado != EstadoChave.NO_MAPA for c in self.chaves)
-                if coletadas == len(self.chaves):
-                    self.porta.liberar()
-                    self.hud.avisar("PORTA DESBLOQUEADA!", duracao=3.0, cor=(170, 255, 190))
-                else:
-                    self.hud.avisar(f"CHAVE OBTIDA! Faltam {len(self.chaves) - coletadas}")
 
         # inimigos
         for inimigo in self.inimigos:
             if inimigo.vivo and hitbox.colliderect(inimigo.hitbox):
-                if inimigo.pisado_por(hitbox, self.player.vel_y):
-                    inimigo.derrotar()
-                    self.player.vel_y = -9      # quique
-                    self.player.no_chao = False
-                else:
-                    self._morrer("Um inimigo te pegou!", "espinho")
-                    return
+                if self.player.receber_dano():
+                    if self.player.vidas <= 0:
+                        self._morrer("Os inimigos acabaram com suas vidas!", "espinho")
+                        return
+                    self.player.x += -16 if inimigo.x > self.player.x else 16
+                    self.hud.avisar_central("Você foi atingido!", cor=(255, 150, 150))
 
         # espinhos
         for espinho in self.espinhos:
@@ -149,15 +202,6 @@ class FaseState(GameState):
         if caiu_no_buraco(self.player, self.altura):
             self._morrer("Você caiu no buraco!", "queda")
             return
-
-        # porta
-        if hitbox.colliderect(self.porta.entrada):
-            if self.porta.liberada:
-                Audio.tocar("entrar")
-                self._mudar_estado(EstadoFaseGenerica.ENTRANDO_PORTA)
-            else:
-                faltam = len(self.chaves) - sum(c.estado != EstadoChave.NO_MAPA for c in self.chaves)
-                self.hud.avisar(f"A porta está trancada! Faltam {faltam} chave(s)", cor=(255, 140, 120))
 
     def _morrer(self, motivo, som):
         self.motivo_morte = motivo
@@ -185,7 +229,8 @@ class FaseState(GameState):
                 from classes.systems.fases import proxima_fase
                 self.gerenciador.mudar_estado(FaseCompletaState(
                     self.gerenciador, self.largura, self.altura,
-                    **proxima_fase(self.indice, self.gerenciador, self.largura, self.altura)))
+                    **proxima_fase(self.indice, self.gerenciador, self.largura, self.altura,
+                                   vidas=self.player.vidas)))
 
     # ------------------------------------------------------------------ desenho
     def desenhar(self, janela):
@@ -205,10 +250,14 @@ class FaseState(GameState):
                 janela.blit(self.sprite_espinho, (x, esp.y), (0, 0, min(51, esp.right - x + 6), 24))
 
         self.porta.desenhar(janela)
-        for chave in self.chaves:
-            chave.desenhar(janela)
+        self.bau.desenhar(janela)
+        for amuleto in self.amuletos:
+            amuleto.desenhar(janela)
+        if self.chave:
+            self.chave.desenhar(janela)
         for inimigo in self.inimigos:
             inimigo.desenhar(janela)
+        self.combate.desenhar(janela)
 
         if self.estado == EstadoFaseGenerica.MORRENDO:
             self.queda.desenhar_player(janela, self.player)
@@ -221,7 +270,10 @@ class FaseState(GameState):
             self.player.desenhar(janela)
 
         self.particulas.desenhar(janela)
-        self.hud.desenhar_contador(janela, self.chaves_chegaram, len(self.chaves))
+        self._desenhar_prompt(janela)
+        self.hud.desenhar_objetivos(
+            janela, self.amuletos_recolhidos, self.tem_chave)
+        self.hud.desenhar_vidas(janela, self.player)
         self.hud.desenhar(janela, mostrar_chave=False)
 
         if self.estado == EstadoFaseGenerica.MORRENDO:
@@ -229,3 +281,21 @@ class FaseState(GameState):
         if self.fade_saida:
             self.fade_saida.desenhar(janela)
         self.fade_entrada.desenhar(janela)
+
+    def _desenhar_prompt(self, janela):
+        if self.estado != EstadoFaseGenerica.JOGANDO:
+            return
+        hitbox = self.player.hitbox()
+        if self.bau.estado == EstadoBau.FECHADO and self.bau.perto(hitbox):
+            texto = "PRESSIONE E PARA ABRIR O BAÚ"
+            y = self.bau.rect.top - 52
+            centro_x = self.bau.rect.centerx
+        elif self.porta.rect.inflate(70, 40).colliderect(hitbox):
+            texto = "PRESSIONE E PARA ENTRAR" if self.porta.liberada else "PRESSIONE E PARA ABRIR"
+            y = self.porta.rect.top - 42
+            centro_x = self.porta.rect.centerx
+        else:
+            return
+        txt = texto_pixel(texto, 8, (255, 255, 255), escala=2)
+        y += int(3 * math.sin(pygame.time.get_ticks() / 200))
+        janela.blit(txt, txt.get_rect(midtop=(max(txt.get_width() // 2 + 8, centro_x), y)))
