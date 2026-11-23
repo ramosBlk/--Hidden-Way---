@@ -25,7 +25,7 @@ class EstadoFaseGenerica(Enum):
 
 class FaseState(GameState):
     """
-    Fase genérica (2 a 5), descrita por uma ConfigFase: coletar TODAS as chaves abre a porta;
+    Fase genérica (2 a 3), descrita por uma ConfigFase: coletar TODAS as chaves abre a porta;
     inimigos (pisão derrota) e espinhos matam; cair no buraco também.
     """
 
@@ -41,6 +41,7 @@ class FaseState(GameState):
 
         x, y_chao = config.spawn
         self.player = Player(x=x, y=y_chao - int(96 * 0.6), escala=0.6)
+        self.player.forca_pulo = config.forca_pulo
         # Altura opcional (4º valor); sem ela, a colisão tem a espessura da plataforma desenhada
         self.plataformas = [pygame.Rect(p[0], p[1], p[2], p[3] if len(p) > 3 else self.ESPESSURA)
                             for p in config.plataformas]
@@ -55,7 +56,13 @@ class FaseState(GameState):
         self.chaves_chegaram = 0     # chaves que já "voaram" até a HUD (contador exibido)
         self.inimigos = [Inimigo(t, x0, x1, y, self.particulas) for t, x0, x1, y in config.inimigos]
         self.espinhos = [pygame.Rect(x, y - 24, w, 24) for x, y, w in config.espinhos]
-        self.porta = Porta(*config.porta, self.particulas)
+        self.porta = Porta(
+            *config.porta,
+            self.particulas,
+            mostrar_textura=config.mostrar_textura_porta,
+            intensidade_brilho=config.intensidade_brilho_porta,
+            halo_anel=config.halo_anel_porta,
+        )
         self.sprite_espinho = carregar_imagem("assets/sprites/itens/espinho.png", (51, 24), (200, 205, 215))
 
         self.estado = EstadoFaseGenerica.JOGANDO

@@ -28,6 +28,10 @@ class ConfigFase:
     espinhos: list = field(default_factory=list)
     paredes: list = field(default_factory=list)
     mostrar_plataformas: bool = True
+    forca_pulo: float = -13.5
+    mostrar_textura_porta: bool = True
+    intensidade_brilho_porta: float = 1.0
+    halo_anel_porta: bool = False
 
 
 FASES = [
@@ -91,12 +95,40 @@ FASES = [
     ConfigFase(
         nome="FASE 3 - A FLORESTA SOMBRIA", fundo="Mapa_3",
         cor_plataforma=(44, 78, 66), cor_topo=(96, 150, 100),
-        spawn=(60, 660), porta=(1340, 660),
-        plataformas=[(0, 660, 300), (400, 660, 200), (700, 660, 200), (1000, 660, 400),
-                     (120, 540, 150), (480, 540, 140), (800, 540, 140), (1120, 540, 160),
-                     (300, 420, 130), (620, 420, 130), (960, 420, 130), (1260, 420, 140)],
-        chaves=[(365, 390), (1025, 390), (1200, 510)],
-        inimigos=[("slime", 1040, 1260, 660), ("morcego", 450, 900, 480)],
+        spawn=(60, 606), porta=(1305, 226),
+        plataformas=[
+            (-4, 606, 248, 7),
+            (268, 432, 102, 20),
+            (442, 386, 88, 7),
+            (360, 156, 92, 10),
+            (546, 194, 72, 7),
+            (-12, 274, 264, 8),
+            (506, 372, 78, 6),
+            (408, 554, 200, 6),
+            (606, 658, 166, 6),
+            (642, 484, 62, 6),
+            (644, 430, 158, 2),
+            (684, 262, 106, 6),
+            (906, 432, 378, 2),
+            (886, 554, 90, 5),
+            (1162, 638, 128, 3),
+            (1286, 538, 88, 6),
+            (1100, 566, 54, 6),
+            (1096, 252, 60, 2),
+            (1204, 226, 202, 11),
+            (292, 602, 100, 10),
+            (926, 294, 92, 6),
+        ],
+        paredes = [
+            (414, 556, 186, 127),
+            (1292, 548, 72, 142),
+        ],
+        chaves=[(318, 400), (394, 112), (1250, 600)],
+        inimigos=[("slime", 950, 1240, 432), ("morcego", 620, 860, 340)],
+        mostrar_plataformas=False,
+        mostrar_textura_porta=False,
+        intensidade_brilho_porta=1.8,
+        halo_anel_porta=True,
     ),
 
 ]
