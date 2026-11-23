@@ -146,7 +146,7 @@ Pygbag transforma o Pygame em uma aplicação web que pode ser aberta em navegad
 1. Instale o Pygbag:
 
 ```bash
-pip install pygbag
+pip install --require-hashes -r requirements-web.txt
 ```
 
 2. Execute o servidor local na pasta do projeto:

@@ -8,8 +8,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -28,15 +26,10 @@ jobs:
           python-version: "3.12"
 
       - name: Instalar Pygbag
-        run: python -m pip install pygbag
+        run: python -m pip install --require-hashes -r requirements-web.txt
 
       - name: Gerar versao web
         run: python -m pygbag --build .
-
-      - name: Configurar GitHub Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Preparar artefato
         uses: actions/upload-pages-artifact@v3
@@ -44,6 +37,10 @@ jobs:
           path: build/web
 
   deploy:
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
