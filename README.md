@@ -139,6 +139,44 @@ pip install pygame-ce
 python main.py
 ```
 
+### Executar no navegador com Pygbag
+
+Pygbag transforma o Pygame em uma aplicação web que pode ser aberta em navegadores de computador.
+
+1. Instale o Pygbag:
+
+```bash
+pip install pygbag
+```
+
+2. Execute o servidor local na pasta do projeto:
+
+```bash
+pygbag .
+```
+
+3. Abra o endereço exibido no terminal, normalmente:
+
+```text
+http://localhost:8000
+```
+
+Para criar os arquivos estáticos do site:
+
+```bash
+pygbag --build .
+```
+
+Os arquivos publicados estarão em `build/web`. Essa pasta pode ser enviada ao itch.io como projeto HTML ou publicada em um serviço de hospedagem estática.
+
+### Publicar no GitHub Pages
+
+Ao enviar alterações para a branch `homologaçãoblk`, o fluxo em
+`.github/workflows/deploy-pages.yml` gera a versão web e publica o jogo automaticamente.
+
+Na primeira publicação, acesse **Settings → Pages** no repositório do GitHub e selecione
+**GitHub Actions** como origem.
+
 ## 🧪 Testar fases e editar o mapa
 
 Os arquivos em `teste/` são ferramentas gráficas independentes do menu principal.
