@@ -98,7 +98,7 @@ FASES = [
 
     # ---- Fase 3: 3 amuletos, 1 slime e 4 morcegos
     ConfigFase(
-        nome="FASE 3 - A FLORESTA SOMBRIA", fundo="Mapa_3",
+        nome="FASE 3 - O CEU", fundo="Mapa_3",
         cor_plataforma=(44, 78, 66), cor_topo=(96, 150, 100),
         spawn=(60, 606), porta=(1305, 226), bau=(300, 384),
         plataformas=[
