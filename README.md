@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="#como-executar"><img src="https://img.shields.io/badge/JOGAR-AGORA-2ea44f?style=for-the-badge" alt="Jogar agora"></a>
+  <a href="https://ramosblk.github.io/--Hidden-Way---/"><img src="https://img.shields.io/badge/JOGAR-AGORA-2ea44f?style=for-the-badge" alt="Jogar agora"></a>
   <a href="#fases"><img src="https://img.shields.io/badge/EXPLORAR-AS_FASES-5865f2?style=for-the-badge" alt="Explorar fases"></a>
   <a href="#testar-fases-e-editar-o-mapa"><img src="https://img.shields.io/badge/TESTAR-FASES-8b5cf6?style=for-the-badge" alt="Testar fases"></a>
 </p>
@@ -139,43 +139,27 @@ pip install pygame-ce
 python main.py
 ```
 
-### Executar no navegador com Pygbag
 
-Pygbag transforma o Pygame em uma aplicação web que pode ser aberta em navegadores de computador.
 
-1. Instale o Pygbag:
+### Testar localmente ou gerar os arquivos web (opcional)
+
+Para pré-visualizar o jogo no próprio computador, instale a versão fixada do Pygbag:
 
 ```bash
 pip install --require-hashes -r requirements-web.txt
 ```
 
-2. Execute o servidor local na pasta do projeto:
+Depois, inicie o servidor local:
 
 ```bash
 pygbag .
 ```
 
-3. Abra o endereço exibido no terminal, normalmente:
-
-```text
-http://localhost:8000
-```
-
-Para criar os arquivos estáticos do site:
+Para gerar os arquivos estáticos sem iniciar o servidor:
 
 ```bash
 pygbag --build .
 ```
-
-Os arquivos publicados estarão em `build/web`. Essa pasta pode ser enviada ao itch.io como projeto HTML ou publicada em um serviço de hospedagem estática.
-
-### Publicar no GitHub Pages
-
-Ao enviar alterações para a branch `homologaçãoblk`, o fluxo em
-`.github/workflows/deploy-pages.yml` gera a versão web e publica o jogo automaticamente.
-
-Na primeira publicação, acesse **Settings → Pages** no repositório do GitHub e selecione
-**GitHub Actions** como origem.
 
 ## 🧪 Testar fases e editar o mapa
 
