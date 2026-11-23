@@ -35,8 +35,8 @@ class GameOverState(GameState):
                 self.gerenciador.mudar_estado(self.reiniciar())
             elif acao == "menu":
                 Audio.tocar("clique")
-                from classes.states.inicio_state import InicioState
-                self.gerenciador.mudar_estado(InicioState(self.gerenciador, self.largura, self.altura))
+                from classes.states.menu_state import MenuState
+                self.gerenciador.mudar_estado(MenuState(self.gerenciador, self.largura, self.altura))
 
     def atualizar(self, dt=1 / 60):
         self.tela_game_over.atualizar(dt)

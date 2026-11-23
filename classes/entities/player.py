@@ -5,7 +5,9 @@ from classes.systems.sprites_player import SpritesPlayer
 
 
 class Player:
-    def __init__(self, x=50, y=570, escala=1.0):
+    TEMPO_FRAME_DISPARO = 0.07
+
+    def __init__(self, x=50, y=570, escala=1.0, vidas=3):
         self.escala = escala
         self.largura = int(96 * escala)
         self.altura = int(96 * escala)
@@ -26,12 +28,18 @@ class Player:
         self.gravidade = 0.6
         self.forca_pulo = -13.5 
         self.no_chao = False
+        self.vidas = max(0, min(3, int(vidas)))
+        self.tempo_invulneravel = 0.0
 
         # Animação
         self.frame = 0
         self.velocidade_animacao = 0.2
         self.sprites = SpritesPlayer((self.largura, self.altura))
         self.imagem = self.sprites.idle_de("direita")
+        self.animacao_disparo = False
+        self.frame_disparo = 0
+        self.tempo_frame_disparo = 0.0
+        self.direcao_disparo = "direita"
 
     # ------------------------------------------------------------------ movimento
     def atualizar_movimento(self, gravidade_ativada=False, plataformas=None, paredes=None):
@@ -61,6 +69,31 @@ class Player:
         self.no_chao = False
         if com_som:
             Audio.tocar("pulo")
+
+    def receber_dano(self):
+        if self.tempo_invulneravel > 0 or self.vidas <= 0:
+            return False
+        self.vidas -= 1
+        self.tempo_invulneravel = 1.0
+        Audio.tocar("jogador_dano")
+        return True
+
+    def atualizar_estado(self, dt):
+        self.tempo_invulneravel = max(0.0, self.tempo_invulneravel - dt)
+
+    def iniciar_animacao_disparo(self):
+        if not self.sprites.disparo:
+            return
+        self.animacao_disparo = True
+        self.frame_disparo = 0
+        self.tempo_frame_disparo = 0.0
+        self.direcao_disparo = self.direcao
+        self.imagem = self._sprite_disparo()
+
+    def _sprite_disparo(self):
+        if self.direcao_disparo == "esquerda":
+            return self.sprites.disparo_esquerda[self.frame_disparo]
+        return self.sprites.disparo[self.frame_disparo]
 
     def _mover_topdown(self, teclas, dx):
         """Tela inicial: movimento livre nos 4 sentidos + pulo simples. Retorna se está andando."""
@@ -111,6 +144,15 @@ class Player:
         self._atualizar_animacao(andando)
 
     def _atualizar_animacao(self, andando):
+        if self.animacao_disparo:
+            self.tempo_frame_disparo += 1 / 60
+            self.frame_disparo = int(self.tempo_frame_disparo / self.TEMPO_FRAME_DISPARO)
+            if self.frame_disparo >= len(self.sprites.disparo):
+                self.animacao_disparo = False
+            else:
+                self.imagem = self._sprite_disparo()
+                return
+
         # No ar: o frame do pulo acompanha a física (0 = saída do chão, 0.5 = pico, 1 = queda)
         if not self.no_chao:
             pulo = self.sprites.pulo_de(self.direcao)

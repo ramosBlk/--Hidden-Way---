@@ -28,8 +28,8 @@ class FaseCompletaState(GameState):
                 if self.proxima_fase:
                     self.gerenciador.mudar_estado(self.proxima_fase())
                 else:
-                    from classes.states.inicio_state import InicioState
-                    self.gerenciador.mudar_estado(InicioState(self.gerenciador, self.largura, self.altura))
+                    from classes.states.menu_state import MenuState
+                    self.gerenciador.mudar_estado(MenuState(self.gerenciador, self.largura, self.altura))
                 return
 
     def atualizar(self, dt=1 / 60):

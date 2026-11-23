@@ -6,6 +6,7 @@ import pygame
 
 from classes.systems.assets import carregar_imagem
 from classes.systems.audio import Audio
+from classes.systems.configuracoes import Configuracoes
 
 
 class EstadoPorta(Enum):
@@ -15,7 +16,7 @@ class EstadoPorta(Enum):
 
 
 class Porta:
-    """Porta de saída da fase: trancada até todas as chaves serem coletadas."""
+    """Porta de saída da fase: abre quando o jogador usa a chave do baú."""
     TEMPO_ABRINDO = 0.9
 
     def __init__(
@@ -65,6 +66,11 @@ class Porta:
                                    velocidade=(15, 40), vida=(0.8, 1.4), tam=(2, 3), angulo=(60, 120), area=(14, 4))
 
     def _halo(self, janela, intensidade):
+        if not Configuracoes.brilhos_ativos():
+            if not self.mostrar_textura:
+                sprite = self.aberta if self.estado == EstadoPorta.ABERTA else self.fechada
+                janela.blit(sprite, self.rect)
+            return
         if self.halo_anel:
             self._desenhar_halo_anel(janela, intensidade)
             return

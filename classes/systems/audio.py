@@ -12,6 +12,7 @@ class Audio:
     """
     _sons = {}
     _pronto = False
+    _volume_mestre = 100
 
     # nome -> lista de (frequência_inicial, frequência_final, duração) tocadas em sequência
     _RECEITAS = {
@@ -27,7 +28,9 @@ class Audio:
         "selecao": [(520, 520, 0.03)],
         # frequência negativa = ruído (pedras, passos, impactos)
         "pulo": [(280, 620, 0.12)],
-        "pisao": [(500, 160, 0.10), (-1, -1, 0.05)],
+        "pedra_disparo": [(-1, -1, 0.035), (260, 160, 0.06)],
+        "pedra_impacto": [(340, 180, 0.08), (-1, -1, 0.035)],
+        "jogador_dano": [(220, 130, 0.16)],
         "inimigo_morre": [(400, 120, 0.16), (-1, -1, 0.08)],
         "pedras": [(-1, -1, 0.25), (-1, -1, 0.2)],
         "bau_rangido": [(110, 190, 0.18), (140, 90, 0.12)],
@@ -68,9 +71,20 @@ class Audio:
                         for _ in range(canais):
                             amostras.append(max(-32000, min(32000, v)))
                 cls._sons[nome] = pygame.mixer.Sound(buffer=amostras.tobytes())
-                cls._sons[nome].set_volume(0.35)
+                cls._sons[nome].set_volume(0.35 * cls._volume_mestre / 100)
         except (pygame.error, NotImplementedError, ValueError):
             cls._sons.clear()
+
+    @classmethod
+    def definir_volume_mestre(cls, percentual):
+        try:
+            percentual = max(0, min(100, int(percentual)))
+        except (TypeError, ValueError, OverflowError):
+            return cls._volume_mestre
+        cls._volume_mestre = percentual
+        for som in cls._sons.values():
+            som.set_volume(0.35 * cls._volume_mestre / 100)
+        return cls._volume_mestre
 
     @classmethod
     def tocar(cls, nome):

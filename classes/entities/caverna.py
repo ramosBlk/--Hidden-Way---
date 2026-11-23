@@ -6,6 +6,7 @@ import pygame
 
 from classes.systems.assets import carregar_imagem
 from classes.systems.audio import Audio
+from classes.systems.configuracoes import Configuracoes
 
 
 class EstadoCaverna(Enum):
@@ -66,6 +67,9 @@ class Caverna:
                                    area=(18, 6))
 
     def _desenhar_luz(self, janela, intensidade):
+        if not Configuracoes.brilhos_ativos():
+            janela.blit(self.luz, self.luz.get_rect(center=self.CENTRO))
+            return
         pulso = 1 + 0.06 * math.sin(self.tempo * 4)
         escala = (1.0 + 2.2 * self.brilho_extra) * pulso * intensidade
         w, h = int(66 * 1.25 * escala), int(72 * 1.25 * escala)

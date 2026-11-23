@@ -1,12 +1,11 @@
 """
 Definição (dados) das fases 2 e 3 e fábrica de fases.
 
-A fase 1 (Mapa 1: chave -> baú -> caverna) tem estado próprio (Mapa1State). As demais usam o
-FaseState genérico: coletar TODAS as chaves libera a porta; inimigos e espinhos aumentam a
-dificuldade de fase em fase.
+A fase 1 (Mapa 1: amuletos -> baú/chave -> caverna) tem estado próprio (Mapa1State). As demais
+usam o FaseState genérico com a mesma progressão.
 
 Convenções (px, tela de 1400x760):
-    plataformas: (x, y_topo, largura[, altura])  chaves: (x, y) centro
+    plataformas: (x, y_topo, largura[, altura])  amuletos: (x, y) centro
   inimigos:    ("slime", x_min, x_max, y_chão)   |   ("morcego", x_min, x_max, y_base_voo)
   espinhos:    (x, y_topo_da_plataforma, largura)
   porta:       (x_centro, y_chão)          spawn: (x, y_chão)
@@ -23,7 +22,8 @@ class ConfigFase:
     spawn: tuple
     porta: tuple
     plataformas: list
-    chaves: list
+    amuletos: list
+    bau: tuple
     inimigos: list = field(default_factory=list)
     espinhos: list = field(default_factory=list)
     paredes: list = field(default_factory=list)
@@ -37,11 +37,11 @@ class ConfigFase:
 FASES = [
     None,  # índice 0: Mapa 1 (Mapa1State)
 
-    # ---- Fase 2: 2 chaves, 1 inimigo
+    # ---- Fase 2: 3 amuletos, 4 slimes vermelhos
     ConfigFase(
         nome="FASE 2 - A CAVERNA", fundo="Mapa_2",
         cor_plataforma=(74, 70, 98), cor_topo=(120, 116, 150),
-        spawn=(1202, 212), porta=(0, 262),
+        spawn=(1202, 212), porta=(0, 262), bau=(250, 555),
         plataformas=[
             (0, 478, 218, 7),
             (0, 262, 176, 7),
@@ -77,8 +77,13 @@ FASES = [
             (1092, 522, 14, 5),
             (1106, 526, 42, 6),
         ],
-        chaves=[(1296, 410), (234, 582)],
-        inimigos=[("slime", 280, 446, 320)],
+        amuletos=[(1296, 410), (234, 582), (600, 260)],
+        inimigos=[
+            ("slime_vermelho", 280, 446, 320),
+            ("slime_vermelho", 50, 180, 478),
+            ("slime_vermelho", 532, 600, 394),
+            ("slime_vermelho", 982, 1028, 470),
+        ],
         # Corpos de rocha dos penhascos laterais (começam logo abaixo das bordas das plataformas)
         paredes=[
                     (-128, 264, 161, 219),
@@ -91,11 +96,11 @@ FASES = [
         mostrar_plataformas=False,
     ),
 
-    # ---- Fase 3: 3 chaves, 2 inimigos (um voador)
+    # ---- Fase 3: 3 amuletos, 1 slime e 4 morcegos
     ConfigFase(
         nome="FASE 3 - A FLORESTA SOMBRIA", fundo="Mapa_3",
         cor_plataforma=(44, 78, 66), cor_topo=(96, 150, 100),
-        spawn=(60, 606), porta=(1305, 226),
+        spawn=(60, 606), porta=(1305, 226), bau=(300, 384),
         plataformas=[
             (-4, 606, 248, 7),
             (268, 432, 102, 20),
@@ -123,8 +128,13 @@ FASES = [
             (414, 556, 186, 127),
             (1292, 548, 72, 142),
         ],
-        chaves=[(318, 400), (394, 112), (1250, 600)],
-        inimigos=[("slime", 950, 1240, 432), ("morcego", 620, 860, 340)],
+        amuletos=[(318, 400), (580, 170), (1250, 600)],
+        inimigos=[
+            ("morcego", 620, 860, 340),
+            ("morcego", 260, 440, 310),
+            ("morcego", 500, 760, 250),
+            ("morcego", 940, 1180, 350),
+        ],
         mostrar_plataformas=False,
         mostrar_textura_porta=False,
         intensidade_brilho_porta=1.8,
@@ -136,16 +146,16 @@ FASES = [
 TOTAL_FASES = len(FASES)
 
 
-def criar_fase(indice, gerenciador, largura, altura):
+def criar_fase(indice, gerenciador, largura, altura, vidas=3):
     """Cria o estado da fase `indice` (0 = Mapa 1)."""
     if indice == 0:
         from classes.states.mapa1_state import Mapa1State
-        return Mapa1State(gerenciador, largura, altura)
+        return Mapa1State(gerenciador, largura, altura, vidas=vidas)
     from classes.states.fase_state import FaseState
-    return FaseState(gerenciador, largura, altura, FASES[indice], indice)
+    return FaseState(gerenciador, largura, altura, FASES[indice], indice, vidas=vidas)
 
 
-def proxima_fase(indice, gerenciador, largura, altura):
+def proxima_fase(indice, gerenciador, largura, altura, vidas=3):
     """
     Argumentos (titulo, subtitulo, proxima_fase) para a FaseCompletaState depois de concluir
     a fase `indice`. Na última fase, proxima_fase é None (volta ao menu).
@@ -153,5 +163,6 @@ def proxima_fase(indice, gerenciador, largura, altura):
     if indice + 1 < TOTAL_FASES:
         return dict(titulo="FASE COMPLETA!",
                     subtitulo=f"Você desbloqueou a fase {indice + 2}!",
-                    proxima_fase=lambda: criar_fase(indice + 1, gerenciador, largura, altura))
+                    proxima_fase=lambda: criar_fase(
+                        indice + 1, gerenciador, largura, altura, vidas=vidas))
     return dict(titulo="JOGO COMPLETO!", subtitulo="Você escapou da Hidden Way. Parabéns!", proxima_fase=None)
