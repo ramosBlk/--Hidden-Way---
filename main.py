@@ -17,9 +17,18 @@ sobreposicao_brilho.fill((0, 0, 0))
 brilho_aplicado = None
 
 
-# Define o estado inicial do jogo (menu principal)
-gerenciador.mudar_estado(MenuState(gerenciador, LARGURA, ALTURA))
+async def main():
+    global brilho_aplicado
 
+    gerenciador = GameManager()
+    gerenciador.mudar_estado(MenuState(gerenciador, LARGURA, ALTURA))
+
+    relogio = pygame.time.Clock()
+    rodando = True
+    pygame.event.clear()
+
+    while rodando:
+        dt = relogio.tick(60) / 1000.0
         eventos = pygame.event.get()
         for evento in eventos:
             if evento.type == pygame.QUIT:
@@ -31,19 +40,17 @@ gerenciador.mudar_estado(MenuState(gerenciador, LARGURA, ALTURA))
         janela.fill((0, 0, 0))
         gerenciador.desenhar(janela)
 
+        if brilho_aplicado != Configuracoes.brilho:
+            brilho_aplicado = Configuracoes.brilho
+            alpha_brilho = round((100 - brilho_aplicado) / 100 * 220)
+            sobreposicao_brilho.set_alpha(alpha_brilho)
+        if brilho_aplicado < 100:
+            janela.blit(sobreposicao_brilho, (0, 0))
+
         pygame.display.flip()
         await asyncio.sleep(0)
 
     pygame.quit()
-
-    if brilho_aplicado != Configuracoes.brilho:
-        brilho_aplicado = Configuracoes.brilho
-        alpha_brilho = round((100 - brilho_aplicado) / 100 * 220)
-        sobreposicao_brilho.set_alpha(alpha_brilho)
-    if brilho_aplicado < 100:
-        janela.blit(sobreposicao_brilho, (0, 0))
-
-    pygame.display.flip()
 
 if __name__ == "__main__":
     asyncio.run(main())
