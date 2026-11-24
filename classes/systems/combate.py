@@ -39,19 +39,20 @@ class SistemaCombate:
         self.tempo_disparo = max(0.0, self.tempo_disparo - dt)
         restantes = []
         for pedra in self.projeteis:
-            if not pedra.atualizar(dt):
-                continue
+            continua = pedra.atualizar(dt)
+            trajetoria = pedra.rect.union(pedra.rect_anterior)
             atingiu = False
             for inimigo in self.inimigos:
-                if inimigo.vivo and pedra.rect.colliderect(inimigo.hitbox):
+                hitbox = inimigo.hitbox
+                if inimigo.vivo and trajetoria.colliderect(hitbox):
                     inimigo.receber_dano()
                     self.particulas.emitir(
-                        pedra.rect.centerx, pedra.rect.centery, 8,
+                        *trajetoria.clip(hitbox).center, 8,
                         [(160, 170, 182), (220, 226, 232), (90, 100, 115)],
                         velocidade=(35, 125), vida=(0.2, 0.45), tam=(2, 4))
                     atingiu = True
                     break
-            if not atingiu:
+            if not atingiu and continua:
                 restantes.append(pedra)
         self.projeteis = restantes
 

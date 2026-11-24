@@ -1,5 +1,7 @@
 import pygame
 
+from classes.systems.assets import carregar_imagem
+
 
 class Cenario:
     def __init__(self, caminho_imagem, caminho_segunda_imagem=None, largura=1400, altura=760, velocidade=3.5, eh_plataforma=False,
@@ -9,12 +11,14 @@ class Cenario:
         self.velocidade = velocidade
         self.eh_plataforma = eh_plataforma
 
-        img_original = pygame.image.load(caminho_imagem).convert()
+        img_original = carregar_imagem(caminho_imagem, alpha=False, fallback=False)
         self.imagem_1_esquerda = pygame.transform.scale(img_original, (self.largura, self.altura))
         self.imagem_1_direita = pygame.transform.flip(self.imagem_1_esquerda, True, False)
 
         if caminho_segunda_imagem:
-            self.imagem_2 = pygame.image.load(caminho_segunda_imagem).convert()
+            self.imagem_2 = carregar_imagem(
+                caminho_segunda_imagem, alpha=False, fallback=False
+            )
             self.imagem_2 = pygame.transform.scale(self.imagem_2, (self.largura, self.altura))
         else:
             self.imagem_2 = self.imagem_1_esquerda

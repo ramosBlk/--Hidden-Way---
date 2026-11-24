@@ -11,6 +11,7 @@ os.chdir(RAIZ_PROJETO)
 
 from classes.systems.fases import FASES, criar_fase
 from classes.systems.game_manager import GameManager
+from classes.systems.timing import FIXED_TIMESTEP, accumulate_frame_time
 
 
 LARGURA = 1400
@@ -26,6 +27,7 @@ class TesteFases:
         self.gerenciador = GameManager()
         self.fase_atual = None
         self.rodando = True
+        self.acumulador = 0.0
         self.fonte_titulo = pygame.font.SysFont("consolas", 42, bold=True)
         self.fonte_opcao = pygame.font.SysFont("consolas", 27)
         self.fonte_ajuda = pygame.font.SysFont("consolas", 18)
@@ -43,6 +45,7 @@ class TesteFases:
 
     def _voltar_seletor(self):
         self.fase_atual = None
+        self.acumulador = 0.0
         self.gerenciador.mudar_estado(None)
 
     def _tratar_eventos(self, eventos):
@@ -96,9 +99,12 @@ class TesteFases:
             self._tratar_eventos(pygame.event.get())
 
             if self.fase_atual is None:
+                self.acumulador = 0.0
                 self._desenhar_seletor()
             else:
-                self.gerenciador.atualizar(dt)
+                passos, self.acumulador = accumulate_frame_time(dt, self.acumulador)
+                for _ in range(passos):
+                    self.gerenciador.atualizar(FIXED_TIMESTEP)
                 self.gerenciador.desenhar(self.janela)
 
             pygame.display.flip()

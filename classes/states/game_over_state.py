@@ -1,4 +1,3 @@
-import pygame
 from classes.states.game_state import GameState
 from classes.game_over import GameOver
 from classes.systems.audio import Audio

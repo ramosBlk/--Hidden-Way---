@@ -12,6 +12,7 @@ class Pedra:
         self.distancia = 0.0
         self.rect = pygame.Rect(0, 0, 20, 16)
         self.rect.center = (round(x), round(y))
+        self.rect_anterior = self.rect.copy()
         self.sprites = self._criar_sprites()
 
     @staticmethod
@@ -42,6 +43,7 @@ class Pedra:
         return sprite, pygame.transform.flip(sprite, True, False)
 
     def atualizar(self, dt):
+        self.rect_anterior = self.rect.copy()
         deslocamento = self.VELOCIDADE * dt
         self.rect.x += round(self.direcao * deslocamento)
         self.distancia += deslocamento

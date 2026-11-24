@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/sprites/telas/Mapa_3.png" alt="Portal no cenário da Floresta Sombria" width="100%">
+  <img src="https://raw.githubusercontent.com/ramosBlk/--Hidden-Way---/main/assets/sprites/telas/Mapa_3.png" alt="Portal no cenário da Floresta Sombria" width="100%">
 </p>
 
 <h1 align="center">HIDDEN WAY</h1>
@@ -52,28 +52,28 @@ A introdução começa perto da árvore para que o jogador chegue mais rápido �
     <td align="center"><strong>Fase 3 · O Céu </strong></td>
   </tr>
   <tr>
-    <td><img src="assets/sprites/telas/Mapa_1.png" alt="Cenário do Mapa 1" width="320"></td>
-    <td><img src="assets/sprites/telas/Mapa_2.png" alt="Cenário da Caverna" width="320"></td>
-    <td><img src="assets/sprites/telas/Mapa_3.png" alt="Cenário da Floresta Sombria e portal" width="320"></td>
+    <td><img src="https://raw.githubusercontent.com/ramosBlk/--Hidden-Way---/main/assets/sprites/telas/Mapa_1.png" alt="Cenário do Mapa 1" width="320"></td>
+    <td><img src="https://raw.githubusercontent.com/ramosBlk/--Hidden-Way---/main/assets/sprites/telas/Mapa_2.png" alt="Cenário da Caverna" width="320"></td>
+    <td><img src="https://raw.githubusercontent.com/ramosBlk/--Hidden-Way---/main/assets/sprites/telas/Mapa_3.png" alt="Cenário da Floresta Sombria e portal" width="320"></td>
   </tr>
 </table>
 
 <p align="center">
   <strong>Personagem</strong>
   &nbsp;&nbsp;
-  <img src="assets/sprites/personagem_principal/rotations/south.png" alt="Personagem principal" width="68">
+  <img src="https://raw.githubusercontent.com/ramosBlk/--Hidden-Way---/main/assets/sprites/personagem_principal/rotations/south.png" alt="Personagem principal" width="68">
   &nbsp;&nbsp;&nbsp;&nbsp;
   <strong>Slime</strong>
   &nbsp;&nbsp;
-  <img src="assets/sprites/inimigos/slime_0.png" alt="Inimigo slime" width="62">
+  <img src="https://raw.githubusercontent.com/ramosBlk/--Hidden-Way---/main/assets/sprites/inimigos/slime_0.png" alt="Inimigo slime" width="62">
   &nbsp;&nbsp;&nbsp;&nbsp;
   <strong>Morcego</strong>
   &nbsp;&nbsp;
-  <img src="assets/sprites/inimigos/morcego_0.png" alt="Inimigo morcego" width="62">
+  <img src="https://raw.githubusercontent.com/ramosBlk/--Hidden-Way---/main/assets/sprites/inimigos/morcego_0.png" alt="Inimigo morcego" width="62">
   &nbsp;&nbsp;&nbsp;&nbsp;
   <strong>Chave</strong>
   &nbsp;&nbsp;
-  <img src="assets/sprites/itens/chave.png" alt="Chave coletável" width="48">
+  <img src="https://raw.githubusercontent.com/ramosBlk/--Hidden-Way---/main/assets/sprites/itens/chave.png" alt="Chave coletável" width="48">
 </p>
 
 
@@ -113,14 +113,33 @@ as **setas** e confirme com **Enter**, **Espaço** ou clique do mouse.
 
 ```
 Hidden Way/
-├── assets/          # Cenários, sprites, efeitos e itens
+├── assets/          # Cenários, sprites, efeitos, itens e data/fases.json
 ├── classes/         # Estados, entidades e sistemas do jogo
-├── teste/           # Seletor de fases e editores de plataformas/paredes
+│   └── systems/     # Tempo, combate, recursos e carregamento de fases
+├── teste/           # Seletor de fases e editores de mapas
+├── tests/           # Testes automatizados
+├── tools/           # Ferramentas de desenvolvimento
 ├── main.py          # Inicialização normal do jogo
 └── README.md
 ```
 
 ---
+
+### Dados das fases
+
+As configurações das fases genéricas ficam em `assets/data/fases.json`; o Mapa 1 mantém seu
+estado e sua progressão próprios. O arquivo é lido e validado ao iniciar o jogo. Cada entrada
+define o fundo, cores, nascimento, porta, baú, amuletos, plataformas, paredes, espinhos e inimigos.
+
+As plataformas usam `[x, y, largura]` ou `[x, y, largura, altura]`; paredes usam
+`[x, y, largura, altura]`; amuletos usam `[x, y]`; inimigos usam
+`[tipo, limite_x_inicial, limite_x_final, y]`. Os tipos aceitos são `slime`, `slime_vermelho`
+e `morcego`. As dimensões devem ser positivas e as cores usam canais RGB entre 0 e 255.
+O fundo deve corresponder a uma imagem em `assets/sprites/telas/`, sem a extensão `.png`.
+
+Para criar uma fase genérica, acrescente um objeto à lista JSON, usando os campos das fases
+existentes como modelo. Erros de estrutura ou valores inválidos geram uma mensagem explícita
+durante o carregamento, em vez de produzir uma fase parcialmente configurada.
 
 ## 🚀 Como executar
 
@@ -136,16 +155,26 @@ git clone https://github.com/ramosBlk/--Hidden-Way---.git
 cd --Hidden-Way---
 ```
 
-3. Instale a dependência
+3. Instale as dependências do jogo
 
 ```bash
-pip install pygame-ce
+pip install -r requirements.txt
 ```
 
 4. Inicie o jogo pelo menu
 
 ```bash
 python main.py
+```
+
+### Testes e verificações de desenvolvimento
+
+Instale as ferramentas de desenvolvimento e execute os testes automatizados:
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest -q
+ruff check .
 ```
 
 ### Jogar no navegador
@@ -199,7 +228,9 @@ python teste/test_paredes_fase3.py
 
 Nos editores, use **TAB** para trocar de elemento, **N** para adicionar, **DELETE** para excluir, as **setas** para mover, **Q/E** para ajustar a largura e **A/D** para ajustar a altura. **ENTER** imprime as coordenadas no terminal.
 
-Os editores não salvam as coordenadas automaticamente. Depois de exportá-las, copie a lista impressa para a configuração correspondente em `classes/systems/fases.py`.
+Os editores não salvam as coordenadas automaticamente. Para as fases 2 e 3, coloque as
+coordenadas exportadas no objeto da fase correspondente em `assets/data/fases.json`; use as
+demais entradas do arquivo como modelo. O Mapa 1 tem estado e geometria próprios.
 
 ---
 
