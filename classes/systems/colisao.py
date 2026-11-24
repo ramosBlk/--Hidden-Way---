@@ -1,6 +1,8 @@
 import math
 import pygame
 
+from classes.systems.assets import carregar_imagem
+
 # Plataformas podem ter apenas 2 px de espessura, então cada sub-passo deve ser menor.
 PASSO_MAXIMO = 1
 
@@ -10,7 +12,9 @@ class Colisao:
         self.altura = altura
 
         if caminho_mascara:
-            self.mascara_superficie = pygame.image.load(caminho_mascara).convert()
+            self.mascara_superficie = carregar_imagem(
+                caminho_mascara, alpha=False, fallback=False
+            )
         else:
             self.mascara_superficie = pygame.Surface((self.largura, self.altura))
             self.mascara_superficie.fill((0, 0, 0))

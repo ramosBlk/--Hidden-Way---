@@ -1,7 +1,11 @@
 import os
+from pathlib import Path
+
 import pygame
 
-BASE = os.path.join("assets", "sprites", "personagem_principal")
+from classes.systems.assets import carregar_imagem
+
+BASE = str(Path(__file__).resolve().parents[2] / "assets" / "sprites" / "personagem_principal")
 REF = 64  # tamanho original (px) dos PNGs do personagem
 
 
@@ -30,7 +34,7 @@ class SpritesPlayer:
 
     def _imagem(self, caminho, recorte=None, normalizar_altura=False):
         try:
-            img = pygame.image.load(os.path.join(BASE, caminho)).convert_alpha()
+            img = carregar_imagem(os.path.join(BASE, caminho), fallback=False)
             if recorte:
                 img = img.subsurface((*recorte, REF, REF)).copy()
             if normalizar_altura:
@@ -47,7 +51,7 @@ class SpritesPlayer:
                     normalizada.blit(ampliada, (round(destino_x), round(destino_y)))
                     return normalizada
             return pygame.transform.scale(img, self.tamanho)
-        except (pygame.error, FileNotFoundError, ValueError):
+        except (pygame.error, OSError, ValueError):
             return pygame.Surface(self.tamanho)
 
     def _pasta(self, caminho, recorte=None, normalizar_altura=False):

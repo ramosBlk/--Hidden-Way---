@@ -319,7 +319,7 @@ def gerar_morcego(frame):
                   "dpd.dpwpppwpd.dp",
                   "dd...d.pp.d...dd",
                   "d..............d"]
-    return contorno(_desenhar_ascii([l.ljust(16, ".")[:16] for l in linhas], pal), (24, 12, 40))
+    return contorno(_desenhar_ascii([linha.ljust(16, ".")[:16] for linha in linhas], pal), (24, 12, 40))
 
 
 def gerar_espinho():
@@ -332,7 +332,7 @@ def gerar_espinho():
               ".mmmdd.mmmdd.mmmd",
               "lmmmddlmmmddlmmmd",
               "ddddddddddddddddd"]
-    return contorno(_desenhar_ascii([l[:17] for l in linhas], pal), (40, 40, 52))
+    return contorno(_desenhar_ascii([linha[:17] for linha in linhas], pal), (40, 40, 52))
 
 
 def gerar_porta(aberta):

@@ -1,41 +1,44 @@
 import asyncio
 
 import pygame
+
 from classes.systems.game_manager import GameManager
 from classes.states.menu_state import MenuState
 from classes.systems.configuracoes import Configuracoes
-
-pygame.init()
-Configuracoes.carregar()
+from classes.systems.timing import FIXED_TIMESTEP, accumulate_frame_time
 
 LARGURA = 1400
 ALTURA = 760
-janela = pygame.display.set_mode((LARGURA, ALTURA))
-pygame.display.set_caption("Hidden Way")
-sobreposicao_brilho = pygame.Surface((LARGURA, ALTURA))
-sobreposicao_brilho.fill((0, 0, 0))
-brilho_aplicado = None
 
 
 async def main():
-    global brilho_aplicado
+    pygame.init()
+    Configuracoes.carregar()
 
+    janela = pygame.display.set_mode((LARGURA, ALTURA))
+    pygame.display.set_caption("Hidden Way")
+    sobreposicao_brilho = pygame.Surface((LARGURA, ALTURA))
+    sobreposicao_brilho.fill((0, 0, 0))
+    brilho_aplicado = None
     gerenciador = GameManager()
     gerenciador.mudar_estado(MenuState(gerenciador, LARGURA, ALTURA))
 
     relogio = pygame.time.Clock()
     rodando = True
+    acumulador = 0.0
     pygame.event.clear()
 
     while rodando:
-        dt = relogio.tick(60) / 1000.0
+        frame_delta = relogio.tick(60) / 1000.0
         eventos = pygame.event.get()
         for evento in eventos:
             if evento.type == pygame.QUIT:
                 rodando = False
 
         gerenciador.tratar_eventos(eventos)
-        gerenciador.atualizar(dt)
+        passos, acumulador = accumulate_frame_time(frame_delta, acumulador)
+        for _ in range(passos):
+            gerenciador.atualizar(FIXED_TIMESTEP)
 
         janela.fill((0, 0, 0))
         gerenciador.desenhar(janela)
@@ -51,6 +54,7 @@ async def main():
         await asyncio.sleep(0)
 
     pygame.quit()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

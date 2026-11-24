@@ -1,16 +1,42 @@
-"""
-Definição (dados) das fases 2 e 3 e fábrica de fases.
-
-A fase 1 (Mapa 1: amuletos -> baú/chave -> caverna) tem estado próprio (Mapa1State). As demais
-usam o FaseState genérico com a mesma progressão.
-
-Convenções (px, tela de 1400x760):
-    plataformas: (x, y_topo, largura[, altura])  amuletos: (x, y) centro
-  inimigos:    ("slime", x_min, x_max, y_chão)   |   ("morcego", x_min, x_max, y_base_voo)
-  espinhos:    (x, y_topo_da_plataforma, largura)
-  porta:       (x_centro, y_chão)          spawn: (x, y_chão)
-"""
+"""Carregamento e validação dos dados das fases e fábrica de estados."""
+import json
 from dataclasses import dataclass, field
+from math import isfinite
+from pathlib import Path
+
+
+_ARQUIVO_FASES = Path(__file__).resolve().parents[2] / "assets" / "data" / "fases.json"
+
+
+def _validar_tupla_numerica(valor, tamanho, nome, *, inteiros=False):
+    if not isinstance(valor, (list, tuple)) or len(valor) != tamanho:
+        raise ValueError(f"{nome} deve conter exatamente {tamanho} valores")
+    if any(
+        isinstance(item, bool)
+        or not isinstance(item, (int, float))
+        or not isfinite(item)
+        or (inteiros and not isinstance(item, int))
+        for item in valor
+    ):
+        raise ValueError(f"{nome} deve conter valores numéricos válidos")
+    return tuple(valor)
+
+
+def _validar_geometrias(valores, nome, tamanhos):
+    if not isinstance(valores, list):
+        raise ValueError(f"{nome} deve ser uma lista")
+    resultado = []
+    for indice, valor in enumerate(valores):
+        if not isinstance(valor, (list, tuple)) or len(valor) not in tamanhos:
+            formatos = " ou ".join(map(str, tamanhos))
+            raise ValueError(f"{nome}[{indice}] deve conter {formatos} valores")
+        geometria = _validar_tupla_numerica(
+            valor, len(valor), f"{nome}[{indice}]", inteiros=True
+        )
+        if any(dimensao <= 0 for dimensao in geometria[2:]):
+            raise ValueError(f"{nome}[{indice}] deve ter dimensões positivas")
+        resultado.append(geometria)
+    return resultado
 
 
 @dataclass
@@ -33,115 +59,105 @@ class ConfigFase:
     intensidade_brilho_porta: float = 1.0
     halo_anel_porta: bool = False
 
+    def __post_init__(self):
+        if not isinstance(self.nome, str) or not self.nome.strip():
+            raise ValueError("nome da fase não pode ser vazio")
+        if not isinstance(self.fundo, str) or not self.fundo.strip():
+            raise ValueError(f"{self.nome}: fundo não pode ser vazio")
 
-FASES = [
-    None,  # índice 0: Mapa 1 (Mapa1State)
+        self.cor_plataforma = _validar_tupla_numerica(
+            self.cor_plataforma, 3, f"{self.nome}.cor_plataforma", inteiros=True
+        )
+        self.cor_topo = _validar_tupla_numerica(
+            self.cor_topo, 3, f"{self.nome}.cor_topo", inteiros=True
+        )
+        for nome, cor in (
+            ("cor_plataforma", self.cor_plataforma),
+            ("cor_topo", self.cor_topo),
+        ):
+            if any(canal < 0 or canal > 255 for canal in cor):
+                raise ValueError(f"{self.nome}.{nome} deve usar canais entre 0 e 255")
 
-    # ---- Fase 2: 3 amuletos, 4 slimes vermelhos
-    ConfigFase(
-        nome="FASE 2 - A CAVERNA", fundo="Mapa_2",
-        cor_plataforma=(74, 70, 98), cor_topo=(120, 116, 150),
-        spawn=(1202, 212), porta=(0, 262), bau=(250, 555),
-        plataformas=[
-            (0, 478, 218, 7),
-            (0, 262, 176, 7),
-            (200, 280, 72, 6),
-            (280, 318, 198, 6),
-            (272, 494, 38, 6),
-            (340, 476, 20, 5),
-            (372, 460, 152, 2),
-            (558, 278, 122, 2),
-            (514, 394, 104, 6),
-            (626, 396, 36, 5),
-            (706, 430, 112, 4),
-            (356, 178, 88, 3),
-            (672, 258, 94, 5),
-            (786, 198, 24, 4),
-            (806, 530, 46, 6),
-            (874, 554, 90, 4),
-            (964, 470, 82, 6),
-            (1148, 528, 122, 5),
-            (1028, 514, 40, 5),
-            (1194, 644, 156, 4),
-            (970, 120, 174, 4),
-            (1202, 212, 160, 4),
-            (1118, 348, 52, 5),
-            (1222, 428, 134, 5),
-            (138, 604, 216, 5),
-            (840, 340, 34, 4),
-            (892, 352, 28, 5),
-            (818, 186, 72, 3),
-            (924, 334, 96, 3),
-            (892, 146, 68, 4),
-            (1068, 518, 24, 6),
-            (1092, 522, 14, 5),
-            (1106, 526, 42, 6),
-        ],
-        amuletos=[(1296, 410), (234, 582), (600, 260)],
-        inimigos=[
-            ("slime_vermelho", 280, 446, 320),
-            ("slime_vermelho", 50, 180, 478),
-            ("slime_vermelho", 532, 600, 394),
-            ("slime_vermelho", 982, 1028, 470),
-        ],
-        # Corpos de rocha dos penhascos laterais (começam logo abaixo das bordas das plataformas)
-        paredes=[
-                    (-128, 264, 161, 219),
-            (0, 485, 135, 275),
-            (138, 612, 215, 148),
-            (1355, 217, 67, 545),
-            (1194, 540, 81, 45),
-            (1194, 652, 161, 108),
-        ],
-        mostrar_plataformas=False,
-    ),
+        for nome in ("spawn", "porta", "bau"):
+            setattr(
+                self, nome,
+                _validar_tupla_numerica(
+                    getattr(self, nome), 2, f"{self.nome}.{nome}", inteiros=True
+                ),
+            )
+        self.plataformas = _validar_geometrias(
+            self.plataformas, f"{self.nome}.plataformas", (3, 4)
+        )
+        self.paredes = _validar_geometrias(
+            self.paredes, f"{self.nome}.paredes", (4,)
+        )
+        self.espinhos = _validar_geometrias(
+            self.espinhos, f"{self.nome}.espinhos", (3,)
+        )
 
-    # ---- Fase 3: 3 amuletos, 1 slime e 4 morcegos
-    ConfigFase(
-        nome="FASE 3 - O CEU", fundo="Mapa_3",
-        cor_plataforma=(44, 78, 66), cor_topo=(96, 150, 100),
-        spawn=(60, 606), porta=(1305, 226), bau=(300, 384),
-        plataformas=[
-            (-4, 606, 248, 7),
-            (268, 432, 102, 20),
-            (442, 386, 88, 7),
-            (360, 156, 92, 10),
-            (546, 194, 72, 7),
-            (-12, 274, 264, 8),
-            (506, 372, 78, 6),
-            (408, 554, 200, 6),
-            (606, 658, 166, 6),
-            (642, 484, 62, 6),
-            (644, 430, 158, 2),
-            (684, 262, 106, 6),
-            (906, 432, 378, 2),
-            (886, 554, 90, 5),
-            (1162, 638, 128, 3),
-            (1286, 538, 88, 6),
-            (1100, 566, 54, 6),
-            (1096, 252, 60, 2),
-            (1204, 226, 202, 11),
-            (292, 602, 100, 10),
-            (926, 294, 92, 6),
-        ],
-        paredes = [
-            (414, 556, 186, 127),
-            (1292, 548, 72, 142),
-        ],
-        amuletos=[(318, 400), (580, 170), (1250, 600)],
-        inimigos=[
-            ("morcego", 620, 860, 340),
-            ("morcego", 260, 440, 310),
-            ("morcego", 500, 760, 250),
-            ("morcego", 940, 1180, 350),
-        ],
-        mostrar_plataformas=False,
-        mostrar_textura_porta=False,
-        intensidade_brilho_porta=1.8,
-        halo_anel_porta=True,
-    ),
+        if not isinstance(self.amuletos, list):
+            raise ValueError(f"{self.nome}.amuletos deve ser uma lista")
+        self.amuletos = [
+            _validar_tupla_numerica(
+                ponto, 2, f"{self.nome}.amuletos[{indice}]", inteiros=True
+            )
+            for indice, ponto in enumerate(self.amuletos)
+        ]
+        if not isinstance(self.inimigos, list):
+            raise ValueError(f"{self.nome}.inimigos deve ser uma lista")
+        for indice, inimigo in enumerate(self.inimigos):
+            if (
+                not isinstance(inimigo, (list, tuple))
+                or len(inimigo) != 4
+                or inimigo[0] not in ("slime", "slime_vermelho", "morcego")
+            ):
+                raise ValueError(f"{self.nome}.inimigos[{indice}] tem formato inválido")
+            _validar_tupla_numerica(
+                inimigo[1:], 3, f"{self.nome}.inimigos[{indice}]", inteiros=True
+            )
+            if inimigo[1] >= inimigo[2]:
+                raise ValueError(
+                    f"{self.nome}.inimigos[{indice}] deve ter intervalo horizontal crescente"
+                )
+            self.inimigos[indice] = tuple(inimigo)
 
-]
+        if (
+            isinstance(self.forca_pulo, bool)
+            or not isinstance(self.forca_pulo, (int, float))
+            or not isfinite(self.forca_pulo)
+            or self.forca_pulo >= 0
+        ):
+            raise ValueError(f"{self.nome}.forca_pulo deve ser um número negativo")
+        if (
+            isinstance(self.intensidade_brilho_porta, bool)
+            or not isinstance(self.intensidade_brilho_porta, (int, float))
+            or not isfinite(self.intensidade_brilho_porta)
+            or self.intensidade_brilho_porta < 0
+        ):
+            raise ValueError(
+                f"{self.nome}.intensidade_brilho_porta deve ser não negativa"
+            )
+        for nome in (
+            "mostrar_plataformas",
+            "mostrar_textura_porta",
+            "halo_anel_porta",
+        ):
+            if not isinstance(getattr(self, nome), bool):
+                raise ValueError(f"{self.nome}.{nome} deve ser booleano")
+
+
+def carregar_configuracoes():
+    """Carrega os mapas preservando suas tuplas e valida os dados antes do uso."""
+    with _ARQUIVO_FASES.open(encoding="utf-8") as arquivo:
+        dados = json.load(arquivo)
+    if not isinstance(dados, list) or not dados:
+        raise ValueError(f"{_ARQUIVO_FASES} deve conter uma lista de fases")
+    if any(not isinstance(fase, dict) for fase in dados):
+        raise ValueError(f"{_ARQUIVO_FASES} deve conter objetos de configuração")
+    return [ConfigFase(**fase) for fase in dados]
+
+
+FASES = [None, *carregar_configuracoes()]  # índice 0: Mapa 1 (Mapa1State)
 
 TOTAL_FASES = len(FASES)
 

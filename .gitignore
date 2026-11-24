@@ -7,10 +7,16 @@
 # Cache do Python
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.ruff_cache/
 
 # Arquivos do sistema
 .DS_Store
 Thumbs.db
+
+# Artefatos de build
+build/
+web-cache/
 
 # Configurações locais do jogo
 config.json
